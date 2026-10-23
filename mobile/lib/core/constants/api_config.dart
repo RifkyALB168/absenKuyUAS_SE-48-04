@@ -16,4 +16,15 @@ class ApiConfig {
   );
 
   static const Duration timeout = Duration(seconds: 15);
+
+  /// Kunci Google Geocoding API untuk alamat otomatis (M3).
+  ///
+  /// Tidak ditulis di kode. Isi saat menjalankan aplikasi:
+  /// `flutter run --dart-define=GEOCODING_API_KEY=xxxxxxxx`.
+  static const String geocodingApiKey = String.fromEnvironment(
+    'GEOCODING_API_KEY',
+  );
+
+  /// Basis Google Geocoding API.
+  static const String geocodingBaseUrl = 'https://maps.googleapis.com/maps/api';
 }
