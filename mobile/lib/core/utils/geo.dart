@@ -21,6 +21,21 @@ class GeoPoint {
   bool isWithin(GeoPoint other, double radiusMeters) =>
       distanceTo(other) <= radiusMeters;
 
+  /// Titik baru yang bergeser [eastMeters] ke timur dan [northMeters] ke utara.
+  ///
+  /// Dipakai untuk menempatkan pin pada peta sementara (belum memakai SDK peta)
+  /// dan untuk menghitung pergeseran tampilan peta.
+  GeoPoint offsetBy(double eastMeters, double northMeters) {
+    const double metersPerDegreeLat = 111320;
+    final double cosLat = math.cos(_toRadians(latitude));
+    final double metersPerDegreeLng = metersPerDegreeLat * cosLat;
+    return GeoPoint(
+      latitude + northMeters / metersPerDegreeLat,
+      longitude +
+          (metersPerDegreeLng == 0 ? 0 : eastMeters / metersPerDegreeLng),
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       other is GeoPoint &&
