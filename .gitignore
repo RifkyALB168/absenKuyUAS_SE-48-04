@@ -1,0 +1,15 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+
+# Backend (Node.js)
+backend/node_modules/
+backend/.env
+backend/uploads/
+npm-debug.log*
+
+# Rahasia (API key, kredensial). Contoh konfigurasi taruh di file *.example
+*.env
+!*.env.example
