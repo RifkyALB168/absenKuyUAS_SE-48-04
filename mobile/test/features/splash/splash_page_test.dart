@@ -16,11 +16,12 @@ void main() {
     );
   }
 
-  testWidgets('menampilkan nama aplikasi dan indikator loading', (
+  testWidgets('menampilkan logo, nama aplikasi, dan indikator loading', (
     tester,
   ) async {
     await tester.pumpWidget(buildSplash());
 
+    expect(find.bySemanticsLabel('Logo absenKuy'), findsOneWidget);
     expect(find.text('absenKuy'), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
 

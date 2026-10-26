@@ -12,14 +12,13 @@ class AbsenKuyApp extends StatelessWidget {
       title: 'absenKuy',
       debugShowCheckedModeBanner: false,
       // Sementara sampai tema dari core/theme (mengikuti Figma) tersedia.
-      // primary sama dengan @color/splash_background di Android (res/values/colors.xml).
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF2563EB),
           primary: const Color(0xFF2563EB),
         ),
       ),
-      // Ikon status bar gelap sebagai default; halaman berlatar gelap (Splash)
+      // Ikon status bar gelap sebagai default; halaman berlatar gelap
       // menimpanya dengan AnnotatedRegion sendiri.
       builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.dark,
