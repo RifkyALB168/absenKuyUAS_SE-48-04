@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'features/home/presentation/pages/main_page.dart';
 import 'features/splash/presentation/pages/splash_page.dart';
 
 class AbsenKuyApp extends StatelessWidget {
@@ -25,9 +26,8 @@ class AbsenKuyApp extends StatelessWidget {
         child: child!,
       ),
       home: SplashPage(
-        // Diganti ke Beranda (BottomNavigationBar) pada langkah berikutnya.
-        nextPageBuilder: (_) =>
-            const Scaffold(body: Center(child: Text('Beranda'))),
+        // Sementara langsung ke halaman utama; nanti lewat Login/cek sesi (M1, S4).
+        nextPageBuilder: (_) => const MainPage(),
       ),
     );
   }
