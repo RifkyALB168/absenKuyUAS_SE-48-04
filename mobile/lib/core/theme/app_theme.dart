@@ -19,9 +19,6 @@ class AppTheme {
   /// Tinggi minimum area ketuk (standar Android).
   static const double minTouchTarget = 48;
 
-  /// Jarak antar elemen mengikuti 8-point grid.
-  static const double gap = 16;
-
   static ThemeData get light {
     final ColorScheme scheme =
         ColorScheme.fromSeed(seedColor: AppColors.primary).copyWith(

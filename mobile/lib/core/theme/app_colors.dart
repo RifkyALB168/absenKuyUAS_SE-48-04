@@ -34,15 +34,6 @@ class AppColors {
   /// Latar badge status hadir.
   static const Color successTint = Color(0xFFECFDF5);
 
-  /// Izin atau menunggu persetujuan.
-  static const Color warning = Color(0xFFF59E0B);
-
-  /// Latar badge status izin.
-  static const Color warningTint = Color(0xFFFFFBEB);
-
   /// Di luar radius atau mock GPS.
   static const Color error = Color(0xFFF43F5E);
-
-  /// Latar badge status ditolak.
-  static const Color errorTint = Color(0xFFFFF1F2);
 }

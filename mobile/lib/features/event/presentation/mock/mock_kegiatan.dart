@@ -67,13 +67,6 @@ const List<MockKegiatan> mockKegiatan = <MockKegiatan>[
   ),
 ];
 
-/// Nama kelompok untuk dropdown "Pilih Kelompok / Organisasi".
-const List<String> mockKelompok = <String>[
-  'UKM CCI',
-  'UKM Robotika',
-  'UKM Basket',
-];
-
 /// Teks contoh untuk isian panjang di form.
 const String mockDeskripsiKegiatan =
     'Riset Pasar dan Analisis Kebutuhan: Mengamati tren industri, perilaku '
