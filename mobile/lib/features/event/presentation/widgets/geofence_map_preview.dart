@@ -55,14 +55,14 @@ class GeofenceMapPreview extends StatelessWidget {
             ),
             if (showRadiusLabel)
               Positioned(
-                left: center.dx - 62,
-                top: center.dy - radius - 38,
+                left: center.dx - 45,
+                top: center.dy - radius - 10,
                 child: _RadiusLabel(radiusMeter: radiusMeter),
               ),
             if (showTooltip)
               Positioned(
-                left: 12,
-                top: center.dy - radius - 92,
+                left: center.dx - 100,
+                top: center.dy - radius - 50,
                 child: const _Tooltip(),
               ),
             const Positioned(right: 12, top: 12, child: _ZoomControls()),
@@ -88,7 +88,11 @@ class _RadiusLabel extends StatelessWidget {
       color: AppColors.surface,
       borderRadius: BorderRadius.circular(100),
       boxShadow: const <BoxShadow>[
-        BoxShadow(color: Color(0x1A0F172A), blurRadius: 8, offset: Offset(0, 2)),
+        BoxShadow(
+          color: Color(0x1A0F172A),
+          blurRadius: 8,
+          offset: Offset(0, 2),
+        ),
       ],
     ),
     child: Padding(
@@ -153,7 +157,8 @@ class _ZoomControls extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     children: <Widget>[
       _RoundButton(
-        icon: Icons.gps_fixed,
+        // Zoom reset button
+        icon: Icons.redo,
         background: AppColors.primary,
         foreground: AppColors.surface,
       ),
@@ -184,7 +189,11 @@ class _RoundButton extends StatelessWidget {
       color: background,
       shape: BoxShape.circle,
       boxShadow: const <BoxShadow>[
-        BoxShadow(color: Color(0x1A0F172A), blurRadius: 6, offset: Offset(0, 2)),
+        BoxShadow(
+          color: Color(0x1A0F172A),
+          blurRadius: 6,
+          offset: Offset(0, 2),
+        ),
       ],
     ),
     child: Icon(icon, size: 18, color: foreground),
@@ -309,7 +318,7 @@ class _MapPainter extends CustomPainter {
     for (final Offset unit in _trees) {
       final Offset at = Offset(unit.dx * size.width, unit.dy * size.height);
       canvas.drawCircle(at, 7, canopy);
-      canvas.drawCircle(at.translate(-2, 2), 4, trunk);
+      canvas.drawCircle(at.translate(-0.4, 0), 4, trunk);
     }
   }
 
@@ -381,7 +390,7 @@ class _MapPainter extends CustomPainter {
 
   void _paintMapLabels(Canvas canvas, Size size) {
     _label(canvas, 'Rektorat', Offset(size.width * 0.19, size.height * 0.34));
-    _label(canvas, 'GSO', Offset(size.width * 0.71, size.height * 0.30));
+    _label(canvas, 'GSO', Offset(size.width * 0.68, size.height * 0.33));
     _label(
       canvas,
       'Open Library',
@@ -390,7 +399,7 @@ class _MapPainter extends CustomPainter {
     _label(
       canvas,
       'Kawasan Kampus Telkom Univ',
-      Offset(size.width * 0.30, size.height * 0.93),
+      Offset(size.width * 0.33, size.height * 0.93),
       color: AppColors.primary,
     );
   }
@@ -404,7 +413,11 @@ class _MapPainter extends CustomPainter {
     final TextPainter painter = TextPainter(
       text: TextSpan(
         text: text,
-        style: TextStyle(fontSize: 9, color: color, fontWeight: FontWeight.w600),
+        style: TextStyle(
+          fontSize: 9,
+          color: color,
+          fontWeight: FontWeight.w600,
+        ),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
