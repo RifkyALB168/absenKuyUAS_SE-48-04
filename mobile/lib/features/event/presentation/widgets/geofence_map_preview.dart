@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
-/// Mockup peta untuk M5 (pilih titik & radius geofence).
+/// Peta M5 (pilih titik & radius geofence).
 ///
-/// Peta digambar manual dengan [CustomPaint] supaya mockup bisa jalan tanpa
+/// Peta digambar manual dengan [CustomPaint] supaya layar bisa jalan tanpa
 /// Google Maps API key. Tidak ada gestur, tidak ada kamera, dan tidak ada
 /// permintaan jaringan: semua bentuknya tetap.
 ///

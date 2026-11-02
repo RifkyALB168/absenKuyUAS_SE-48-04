@@ -5,14 +5,14 @@ import '../../../../core/theme/app_theme.dart';
 import '../mock/mock_kegiatan.dart';
 import 'geofence_picker_page.dart';
 
-/// Mockup M3 — "Buat Kegiatan Baru".
+/// Halaman "Buat Kegiatan Baru" (M3).
 ///
 /// Mengikuti desain "Buat Kegiatan": kartu Informasi Kegiatan, kartu Jadwal &
-/// Waktu Presensi, lalu tombol Simpan & Jadwalkan. Semua isian mati
-/// (readOnly) dan nilainya diambil dari [mock_kegiatan.dart]; tidak ada
-/// penyimpanan, validasi, atau panggilan jaringan.
+/// Waktu Presensi, lalu tombol Simpan & Jadwalkan. Isian masih readOnly dan
+/// nilainya diambil dari [mock_kegiatan.dart]; belum ada penyimpanan,
+/// validasi, atau panggilan jaringan.
 ///
-/// Kartu "Titik Lokasi & Radius" ditambahkan sebagai jalan masuk ke mockup M5
+/// Kartu "Titik Lokasi & Radius" membuka pemilih lokasi M5
 /// ([GeofencePickerPage]), sesuai lingkup M3 "pilih lokasi di peta".
 class EventFormPage extends StatelessWidget {
   const EventFormPage({super.key});
@@ -323,7 +323,7 @@ class _DropdownField extends StatelessWidget {
   );
 }
 
-/// Isian teks mati berisi nilai contoh.
+/// Isian teks yang tampil terisi dan tidak dapat diubah.
 class _FilledField extends StatelessWidget {
   const _FilledField({required this.value, this.lines = 1});
 
@@ -419,7 +419,7 @@ class _SyncNote extends StatelessWidget {
   );
 }
 
-/// Ringkasan lokasi dan radius, dengan jalan masuk ke mockup M5.
+/// Ringkasan lokasi dan radius, dengan tombol menuju pemilih lokasi M5.
 class _LocationSummary extends StatelessWidget {
   const _LocationSummary();
 

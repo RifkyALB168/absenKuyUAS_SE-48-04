@@ -5,11 +5,11 @@ import '../../../../core/theme/app_theme.dart';
 import '../mock/mock_kegiatan.dart';
 import '../widgets/geofence_map_preview.dart';
 
-/// Mockup M5 — "Pilih Titik & Radius Geofence".
+/// Halaman "Pilih Titik & Radius Geofence" (M5).
 ///
 /// Semua nilai tetap: radius, alamat, dan koordinat diambil dari
-/// [mock_kegiatan.dart]. Tidak ada state, tidak ada geocoding, dan tidak ada
-/// peta sungguhan; lihat [GeofenceMapPreview].
+/// [mock_kegiatan.dart]. Belum ada state, geocoding, atau peta sungguhan;
+/// lihat [GeofenceMapPreview].
 class GeofencePickerPage extends StatelessWidget {
   const GeofencePickerPage({super.key});
 

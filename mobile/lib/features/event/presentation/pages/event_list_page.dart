@@ -6,11 +6,10 @@ import '../mock/mock_kegiatan.dart';
 import '../widgets/event_card.dart';
 import 'event_form_page.dart';
 
-/// Mockup M3 — daftar kegiatan.
+/// Daftar kegiatan (M3).
 ///
 /// Judul halaman mengikuti desain "Kegiatan: Kelola Kegiatan & Aktivitasmu".
-/// Isinya data tetap dari [mock_kegiatan]; tidak ada pemuatan, pencarian, atau
-/// penyimpanan. Satu-satunya aksi adalah membuka mockup form M3
+/// Isinya data tetap dari [mock_kegiatan]; aksinya membuka form M3
 /// ([EventFormPage]).
 class EventListPage extends StatelessWidget {
   const EventListPage({super.key});

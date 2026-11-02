@@ -1,7 +1,6 @@
-/// Data contoh untuk mockup UI M3 (manajemen kegiatan).
+/// Data kegiatan untuk layar M3 (manajemen kegiatan).
 ///
-/// Mockup sengaja tidak punya fungsi apa pun: tidak ada repository, bloc,
-/// atau pemanggilan jaringan. Semua nilai di bawah ini tetap (hardcoded)
+/// Nilai di bawah ini tetap dan tidak lewat repository, bloc, atau jaringan,
 /// supaya layar bisa dilihat tanpa backend.
 class MockKegiatan {
   const MockKegiatan({
@@ -30,7 +29,7 @@ class MockKegiatan {
 /// Status kegiatan pada daftar M3.
 enum MockStatusKegiatan { berlangsung, dijadwalkan, ditutup }
 
-/// Tiga kegiatan contoh yang tampil di halaman daftar.
+/// Tiga kegiatan yang tampil di halaman daftar.
 const List<MockKegiatan> mockKegiatan = <MockKegiatan>[
   MockKegiatan(
     judul: 'Rapat Pleno & Evaluasi Mingguan',
@@ -67,17 +66,17 @@ const List<MockKegiatan> mockKegiatan = <MockKegiatan>[
   ),
 ];
 
-/// Teks contoh untuk isian panjang di form.
+/// Isi awal untuk isian panjang di form.
 const String mockDeskripsiKegiatan =
     'Riset Pasar dan Analisis Kebutuhan: Mengamati tren industri, perilaku '
     'konsumen, serta menganalisis kelemahan produk kompetitor untuk mencari '
     'peluang baru.';
 
-/// Nilai contoh untuk isian di form M3.
+/// Isi awal untuk isian di form M3.
 const String mockJudulKegiatan = 'Weekly Riset & Development';
 const String mockTanggalKegiatan = 'Jumat, 24 Okt 2026';
 
-/// Nilai contoh untuk layar M5 (pilih titik & radius geofence).
+/// Isi awal untuk layar M5 (pilih titik & radius geofence).
 const String mockAlamatGeocoding =
     'Gedung Student Center, Jl. Telekomunikasi';
 const String mockKoordinatLat = '-6.973210';
