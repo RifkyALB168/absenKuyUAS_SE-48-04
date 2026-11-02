@@ -33,9 +33,7 @@ class PresensiSelfiePage extends StatelessWidget {
               builder: (context) => AlertDialog(
                 title: const Text('Panduan foto selfie'),
                 content: const Text(
-                  'Posisikan wajah di dalam oval dan pastikan pencahayaan cukup. '
-                  'Halaman ini masih pratinjau UI dengan data contoh. '
-                  'Kamera, GPS, dan pengiriman presensi belum diaktifkan.',
+                  'Posisikan wajah di dalam oval dan pastikan pencahayaan cukup.',
                 ),
                 actions: [
                   TextButton(
@@ -79,14 +77,7 @@ class PresensiSelfiePage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8),
-                    child: Text(
-                      'Pratinjau UI · Data contoh',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: _muted, fontSize: 12),
-                    ),
-                  ),
+                  const SizedBox(height: 16),
                   const _CameraPreview(),
                   const SizedBox(height: 12),
                   const _ValidationCard(),
@@ -126,20 +117,12 @@ class _CameraPreview extends StatelessWidget {
                         borderRadius: BorderRadius.circular(200),
                         border: Border.all(color: _guide, width: 1.5),
                       ),
-                      child: const Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.person_outline_rounded,
-                            size: 88,
-                            color: Color(0xFFAAB9C4),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Pratinjau kamera',
-                            style: TextStyle(color: Colors.white, fontSize: 13),
-                          ),
-                        ],
+                      child: const Center(
+                        child: Icon(
+                          Icons.person_outline_rounded,
+                          size: 88,
+                          color: Color(0xFFAAB9C4),
+                        ),
                       ),
                     ),
                   ),
@@ -349,17 +332,13 @@ class _PhotoControls extends StatelessWidget {
                 border: Border.all(color: const Color(0xFFC7D2FE), width: 2),
               ),
               child: IconButton.filled(
-                tooltip: 'Ambil foto contoh',
+                tooltip: 'Ambil foto',
                 style: IconButton.styleFrom(
                   backgroundColor: _blue,
                   foregroundColor: Colors.white,
                   fixedSize: const Size(56, 56),
                 ),
-                onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Pratinjau UI: kamera belum diaktifkan.'),
-                  ),
-                ),
+                onPressed: () {},
                 icon: const Icon(Icons.photo_camera_outlined, size: 28),
               ),
             ),
@@ -381,12 +360,6 @@ class _PhotoControls extends StatelessWidget {
             builder: (_) => const PresensiBerhasilDialog(),
           ),
           child: const Text('Kirim Presensi Sekarang'),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Simulasi hasil · Tidak mengirim data',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: _muted, fontSize: 11),
         ),
       ],
     ),

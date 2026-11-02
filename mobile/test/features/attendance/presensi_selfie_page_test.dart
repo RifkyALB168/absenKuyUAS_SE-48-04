@@ -1,21 +1,18 @@
 import 'package:absen_kuy/features/attendance/presentation/pages/presensi_selfie_page.dart';
-import 'package:absen_kuy/features/home/presentation/pages/main_page.dart';
 import 'package:absen_kuy/features/attendance/presentation/widgets/presensi_berhasil_dialog.dart';
+import 'package:absen_kuy/features/home/presentation/pages/main_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('pratinjau dibuka dari Kegiatan dan ditutup kembali ke tab itu', (
+  testWidgets('presensi dibuka dari Beranda dan ditutup kembali ke tab itu', (
     tester,
   ) async {
     await tester.pumpWidget(const MaterialApp(home: MainPage()));
-    await tester.tap(find.text('Kegiatan'));
-    await tester.pumpAndSettle();
     await tester.tap(find.text('Pratinjau UI Presensi'));
     await tester.pumpAndSettle();
 
     expect(find.text('Kamera Presensi Selfie'), findsOneWidget);
-    expect(find.text('Pratinjau UI · Data contoh'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Tutup presensi'));
     await tester.pumpAndSettle();
@@ -24,28 +21,24 @@ void main() {
       tester
           .widget<BottomNavigationBar>(find.byType(BottomNavigationBar))
           .currentIndex,
-      1,
+      0,
     );
   });
 
-  testWidgets('kamera menjelaskan pratinjau dan Kirim membuka hasil simulasi', (
+  testWidgets('kirim presensi membuka dialog hasil dan dapat ditutup', (
     tester,
   ) async {
     await tester.pumpWidget(const MaterialApp(home: PresensiSelfiePage()));
-    final shutter = find.byTooltip('Ambil foto contoh');
-    await tester.ensureVisible(shutter);
-    await tester.tap(shutter);
-    await tester.pumpAndSettle();
 
-    expect(find.text('Pratinjau UI: kamera belum diaktifkan.'), findsOneWidget);
+    await tester.ensureVisible(find.text('Kirim Presensi Sekarang'));
     await tester.tap(find.text('Kirim Presensi Sekarang'));
     await tester.pumpAndSettle();
+
     expect(find.byType(PresensiBerhasilDialog), findsOneWidget);
     expect(find.text('Presensi Berhasil!'), findsOneWidget);
-    expect(find.textContaining('data belum disimpan'), findsOneWidget);
     expect(find.text('24 Okt 2026, 15:40:12 WIB'), findsOneWidget);
 
-    await tester.tap(find.text('Tutup pratinjau'));
+    await tester.tap(find.text('Tutup'));
     await tester.pumpAndSettle();
     expect(find.byType(PresensiBerhasilDialog), findsNothing);
     expect(find.byType(PresensiSelfiePage), findsOneWidget);
@@ -77,8 +70,8 @@ void main() {
     await tester.tap(find.text('Kirim Presensi Sekarang'));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    await tester.ensureVisible(find.text('Tutup pratinjau'));
-    await tester.tap(find.text('Tutup pratinjau'));
+    await tester.ensureVisible(find.text('Tutup'));
+    await tester.tap(find.text('Tutup'));
     await tester.pumpAndSettle();
     expect(find.byType(PresensiBerhasilDialog), findsNothing);
     expect(tester.takeException(), isNull);
