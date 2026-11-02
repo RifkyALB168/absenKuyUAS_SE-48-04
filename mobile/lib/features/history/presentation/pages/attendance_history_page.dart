@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/attendance_history_item.dart';
-import '../widgets/history_card.dart';
 import '../widgets/filter_chips_row.dart';
+import '../widgets/history_card.dart';
 import '../widgets/semester_overview_card.dart';
-import 'attendance_detail_page.dart';
 
-class AttendanceHistoryPage extends StatefulWidget {
+class AttendanceHistoryPage extends StatelessWidget {
   const AttendanceHistoryPage({super.key});
 
-  @override
-  State<AttendanceHistoryPage> createState() => _AttendanceHistoryPageState();
-}
-
-class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,28 +47,15 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
           children: [
             const SemesterOverviewCard(),
             const FilterChipsRow(),
-
             const SizedBox(height: 4),
-
             Expanded(
               child: ListView.separated(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                 itemCount: dummyHistoryItems.length,
                 separatorBuilder: (context, index) =>
                     const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return HistoryCard(
-                      data: dummyHistoryItems[index],
-                      detailData: const AttendanceDetailData(
-                        title: 'Rapat Pleno & Evaluasi Mingguan',
-                        date: 'Jumat, 24 Oktober 2026 • 15:30 - 17:30 WIB',
-                        location: 'Gedung Tokong Nanas (TULT) Lt. 3',
-                      ),
-                    );
-                  }
-                  return HistoryCard(data: dummyHistoryItems[index]);
-                },
+                itemBuilder: (context, index) =>
+                    HistoryCard(data: dummyHistoryItems[index]),
               ),
             ),
           ],

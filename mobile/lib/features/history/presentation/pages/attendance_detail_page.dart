@@ -1,44 +1,16 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-class AttendanceDetailData {
-  final String title;
-  final String date;
-  final String location;
-
-  const AttendanceDetailData({
-    required this.title,
-    required this.date,
-    required this.location,
-  });
-}
+import '../../domain/entities/attendance_history_item.dart';
+export '../../domain/entities/attendance_history_item.dart'
+    show AttendanceDetailData;
 
 class AttendanceDetailPage extends StatelessWidget {
   final AttendanceDetailData? detailData;
 
   const AttendanceDetailPage({super.key, this.detailData});
+
   @override
   Widget build(BuildContext context) {
-    if (detailData == null) {
-      return Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
-        appBar: AppBar(
-          backgroundColor: const Color(0xFFFFFFFF),
-          elevation: 0,
-          iconTheme: const IconThemeData(color: Color(0xFF0F172A)),
-          title: const Text(
-            'Detail Kegiatan & Presensi',
-            style: TextStyle(color: Color(0xFF0F172A), fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-        ),
-        body: const Center(
-          child: Text(
-            'Data tidak ditemukan',
-            style: TextStyle(color: Color(0xFF64748B), fontSize: 16),
-          ),
-        ),
-      );
-    }
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
@@ -52,7 +24,7 @@ class AttendanceDetailPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            const Text(
               'Detail Kegiatan & Presensi',
               style: TextStyle(
                 color: Color(0xFF0F172A),
@@ -60,8 +32,17 @@ class AttendanceDetailPage extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 2),
-            Text(detailData!.title, style: const TextStyle(color: Color(0xFF64748B), fontSize: 12)),
+            if (detailData != null) ...[
+              const SizedBox(height: 2),
+              Text(
+                detailData!.title,
+                style: const TextStyle(
+                  color: Color(0xFF64748B),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
           ],
         ),
         bottom: const PreferredSize(
@@ -69,16 +50,23 @@ class AttendanceDetailPage extends StatelessWidget {
           child: Divider(height: 1, thickness: 1, color: Color(0xFFF1F5F9)),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _buildMapGeofenceCard(),
-            const SizedBox(height: 16),
-            _buildSelfieMetadataCard(),
-          ],
-        ),
-      ),
+      body: detailData == null
+          ? const Center(
+              child: Text(
+                'Data tidak ditemukan',
+                style: TextStyle(color: Color(0xFF64748B), fontSize: 16),
+              ),
+            )
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _buildMapGeofenceCard(),
+                  const SizedBox(height: 16),
+                  _buildSelfieMetadataCard(),
+                ],
+              ),
+            ),
     );
   }
 
@@ -95,7 +83,6 @@ class AttendanceDetailPage extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Simulated Map Area 
           Positioned(
             top: 14,
             child: Container(
@@ -142,8 +129,6 @@ class AttendanceDetailPage extends StatelessWidget {
               ),
             ),
           ),
-
-          // Bottom Street Banner
           Positioned(
             left: 0,
             right: 0,
@@ -163,81 +148,72 @@ class AttendanceDetailPage extends StatelessWidget {
               ),
             ),
           ),
-
-          // Simulated Circular Geofence with Dashed Border
           Positioned(
             top: 6,
             right: 68,
-            child: CustomPaint(
-              foregroundPainter: _DashedCirclePainter(
-                color: const Color(0xFF2563EB),
+            child: Container(
+              width: 154,
+              height: 154,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0x66EFF6FF),
+                border: Border.all(color: const Color(0xFF2563EB), width: 1.5),
               ),
-              child: Container(
-                width: 154,
-                height: 154,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Color(0x66EFF6FF),
-                ),
-                child: Stack(
-                  children: [
-                    // Event Center Marker
-                    Positioned(
-                      top: 34,
-                      right: 28,
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: 34,
+                    right: 28,
+                    child: Container(
+                      width: 28,
+                      height: 28,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF2563EB),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0x332563EB),
+                            blurRadius: 6,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.location_on,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 26,
+                    left: 30,
+                    child: Container(
+                      width: 46,
+                      height: 46,
+                      alignment: Alignment.center,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0x262563EB),
+                      ),
                       child: Container(
-                        width: 28,
-                        height: 28,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF2563EB),
+                        width: 24,
+                        height: 24,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color(0x332563EB),
-                              blurRadius: 6,
-                              offset: Offset(0, 2),
-                            ),
-                          ],
+                          color: const Color(0xFF2563EB),
+                          border: Border.all(color: Colors.white, width: 2),
                         ),
                         child: const Icon(
                           Icons.location_on,
                           color: Colors.white,
-                          size: 16,
+                          size: 12,
                         ),
                       ),
                     ),
-
-                    // User Location Marker 
-                    Positioned(
-                      bottom: 26,
-                      left: 30,
-                      child: Container(
-                        width: 46,
-                        height: 46,
-                        alignment: Alignment.center,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Color(0x262563EB),
-                        ),
-                        child: Container(
-                          width: 24,
-                          height: 24,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFF2563EB),
-                            border: Border.all(color: Colors.white, width: 2),
-                          ),
-                          child: const Icon(
-                            Icons.location_on,
-                            color: Colors.white,
-                            size: 12,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -265,7 +241,6 @@ class AttendanceDetailPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top Part: Selfie Proof Image (with 300px fallback placeholder)
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Image.asset(
@@ -287,98 +262,42 @@ class AttendanceDetailPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-
-          // Middle Part: ListTile 1 (schedule)
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-            minVerticalPadding: 8,
-            leading: Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: const Color(0xFFEFF6FF),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.access_time_rounded,
-                color: Color(0xFF2563EB),
-                size: 20,
-              ),
-            ),
-            title: const Text(
-              'JADWAL ACARA',
-              style: TextStyle(
-                color: Color(0xFF64748B),
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
-              ),
-            ),
-            subtitle: Padding(
-              padding: EdgeInsets.only(top: 2),
-              child: Text(
-                detailData!.date,
-                style: TextStyle(
-                  color: Color(0xFF0F172A),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                ),
+          _buildInfoTile(
+            icon: Icons.access_time_rounded,
+            title: 'JADWAL ACARA',
+            subtitle: Text(
+              detailData!.date,
+              style: const TextStyle(
+                color: Color(0xFF0F172A),
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
-
-          
-          // Bottom Part: ListTile 2 (verified loc)
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-            minVerticalPadding: 8,
-            isThreeLine: true,
-            leading: Container(
-              width: 38,
-              height: 38,
-              decoration: BoxDecoration(
-                color: const Color(0xFFEFF6FF),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.domain_rounded,
-                color: Color(0xFF2563EB),
-                size: 20,
-              ),
-            ),
-            title: const Text(
-              'LOKASI TERVERIFIKASI',
-              style: TextStyle(
-                color: Color(0xFF64748B),
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
-              ),
-            ),
-            subtitle: Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: '${detailData!.location}\n',
-                      style: const TextStyle(
-                        color: Color(0xFF0F172A),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
+          _buildInfoTile(
+            icon: Icons.domain_rounded,
+            title: 'LOKASI TERVERIFIKASI',
+            subtitle: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: '${detailData!.location}\n',
+                    style: const TextStyle(
+                      color: Color(0xFF0F172A),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
                     ),
-                    const TextSpan(
-                      text: 'Jl. Telekomunikasi No. 1, Terusan Buahbatu,',
-                      style: TextStyle(
-                        color: Color(0xFF64748B),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        height: 1.4,
-                      ),
+                  ),
+                  const TextSpan(
+                    text: 'Jl. Telekomunikasi No. 1, Terusan Buahbatu,',
+                    style: TextStyle(
+                      color: Color(0xFF64748B),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      height: 1.4,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -386,38 +305,37 @@ class AttendanceDetailPage extends StatelessWidget {
       ),
     );
   }
-}
 
-class _DashedCirclePainter extends CustomPainter {
-  final Color color;
-
-  const _DashedCirclePainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1.8
-      ..style = PaintingStyle.stroke;
-
-    final radius = (size.width / 2) - 1;
-    final center = Offset(size.width / 2, size.height / 2);
-    const dashCount = 36;
-    const dashAngle = (2 * math.pi) / dashCount;
-
-    for (int i = 0; i < dashCount; i++) {
-      canvas.drawArc(
-        Rect.fromCircle(center: center, radius: radius),
-        i * dashAngle,
-        dashAngle * 0.55,
-        false,
-        paint,
-      );
-    }
+  Widget _buildInfoTile({
+    required IconData icon,
+    required String title,
+    required Widget subtitle,
+  }) {
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+      minVerticalPadding: 8,
+      leading: Container(
+        width: 38,
+        height: 38,
+        decoration: BoxDecoration(
+          color: const Color(0xFFEFF6FF),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: const Color(0xFF2563EB), size: 20),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Color(0xFF64748B),
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
+        ),
+      ),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(top: 2),
+        child: subtitle,
+      ),
+    );
   }
-
-  @override
-  bool shouldRepaint(covariant _DashedCirclePainter oldDelegate) =>
-      oldDelegate.color != color;
 }
-

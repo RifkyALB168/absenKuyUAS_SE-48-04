@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../domain/entities/attendance_history_item.dart';
 import '../pages/attendance_detail_page.dart';
-import 'status_badge.dart';
 import 'thumbnail_icon.dart';
 
 class HistoryCard extends StatelessWidget {
@@ -17,14 +16,30 @@ class HistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final (badgeTextColor, badgeBgColor, borderColor) =
+        switch (data.thumbnailType) {
+          ThumbnailType.selfie => (
+            const Color(0xFF065F46),
+            const Color(0xFFECFDF5),
+            const Color(0xFFE2E8F0),
+          ),
+          ThumbnailType.document => (
+            const Color(0xFF92400E),
+            const Color(0xFFFFFBEB),
+            const Color(0xFFE2E8F0),
+          ),
+          ThumbnailType.alert => (
+            const Color(0xFF9F1239),
+            const Color(0xFFFFF1F2),
+            const Color(0xFFFECDD3),
+          ),
+        };
+
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: data.borderColor ?? const Color(0xFFE2E8F0),
-          width: 1,
-        ),
+        border: Border.all(color: borderColor, width: 1),
         boxShadow: const [
           BoxShadow(
             color: Color(0x0A0F172A),
@@ -42,7 +57,7 @@ class HistoryCard extends StatelessWidget {
               context,
               MaterialPageRoute(
                 builder: (context) => AttendanceDetailPage(
-                  detailData: detailData,
+                  detailData: detailData ?? data.detailData,
                 ),
               ),
             );
@@ -52,11 +67,8 @@ class HistoryCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Thumbnail / Ikon di kiri
                 ThumbnailIcon(type: data.thumbnailType),
                 const SizedBox(width: 12),
-
-                // Kolom Title, Date, Subtitle
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -95,12 +107,40 @@ class HistoryCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-
-                // Status Badge
-                StatusBadge(
-                  text: data.badgeText,
-                  textColor: data.badgeTextColor,
-                  backgroundColor: data.badgeBackgroundColor,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: badgeBgColor,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: badgeTextColor.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: badgeTextColor,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        data.badgeText,
+                        style: TextStyle(
+                          color: badgeTextColor,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
