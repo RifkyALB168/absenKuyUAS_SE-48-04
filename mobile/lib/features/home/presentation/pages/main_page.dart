@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../attendance/presentation/pages/presensi_selfie_page.dart';
+import '../../../event/presentation/pages/event_list_page.dart';
 
 /// Halaman utama setelah login, berisi 4 tab dengan BottomNavigationBar
 /// sesuai desain Figma (frame "Nav - Destination count: 4").
@@ -28,17 +29,17 @@ class _MainPageState extends State<MainPage> {
     _TabItem(
       label: 'Kegiatan',
       icon: Icons.groups_rounded,
-      page: _TabPlaceholder(
-        title: 'Kegiatan',
-        icon: Icons.groups_rounded,
-        action: _PresensiPreviewButton(),
-      ),
+      page: EventListPage(),
     ),
     // Riwayat kehadiran (Daniartha, M6)
     _TabItem(
       label: 'Riwayat',
       icon: Icons.history_rounded,
-      page: _TabPlaceholder(title: 'Riwayat', icon: Icons.history_rounded),
+      page: _TabPlaceholder(
+        title: 'Riwayat',
+        icon: Icons.history_rounded,
+        action: _PresensiPreviewButton(),
+      ),
     ),
     // Profil pengguna (Affan, M1)
     _TabItem(
@@ -131,11 +132,6 @@ class _TabPlaceholder extends StatelessWidget {
               style: textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Halaman ini sedang dikembangkan',
-              style: textTheme.bodyMedium?.copyWith(color: _navInactive),
             ),
             if (action != null) ...[const SizedBox(height: 16), action!],
           ],

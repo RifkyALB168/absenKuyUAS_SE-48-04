@@ -13,3 +13,7 @@ npm-debug.log*
 # Rahasia (API key, kredensial). Contoh konfigurasi taruh di file *.example
 *.env
 !*.env.example
+
+
+Vk
+Project_Vault_knowledge
