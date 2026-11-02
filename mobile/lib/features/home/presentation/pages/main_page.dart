@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../../attendance/presentation/pages/presensi_selfie_page.dart';
 import '../../../event/presentation/pages/event_list_page.dart';
+import '../../../history/presentation/pages/attendance_history_page.dart';
 
 /// Halaman utama setelah login, berisi 4 tab dengan BottomNavigationBar
 /// sesuai desain Figma (frame "Nav - Destination count: 4").
 ///
-/// Isi tiap tab masih placeholder. Pemilik fitur mengganti widget
-/// di [_tabs] dengan halaman aslinya.
+/// Kegiatan dan Riwayat memakai halaman fiturnya. Beranda dan Profil
+/// masih placeholder; akses pratinjau presensi sementara ada di Beranda.
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
@@ -23,7 +24,11 @@ class _MainPageState extends State<MainPage> {
     _TabItem(
       label: 'Beranda',
       icon: Icons.home_rounded,
-      page: _TabPlaceholder(title: 'Beranda', icon: Icons.home_rounded),
+      page: _TabPlaceholder(
+        title: 'Beranda',
+        icon: Icons.home_rounded,
+        action: _PresensiPreviewButton(),
+      ),
     ),
     // Daftar kegiatan (Ibnu, M3)
     _TabItem(
@@ -35,11 +40,7 @@ class _MainPageState extends State<MainPage> {
     _TabItem(
       label: 'Riwayat',
       icon: Icons.history_rounded,
-      page: _TabPlaceholder(
-        title: 'Riwayat',
-        icon: Icons.history_rounded,
-        action: _PresensiPreviewButton(),
-      ),
+      page: AttendanceHistoryPage(),
     ),
     // Profil pengguna (Affan, M1)
     _TabItem(

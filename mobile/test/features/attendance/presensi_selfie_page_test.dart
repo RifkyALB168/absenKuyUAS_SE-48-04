@@ -5,12 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('presensi dibuka dari Riwayat dan ditutup kembali ke tab itu', (
+  testWidgets('presensi dibuka dari Beranda dan ditutup kembali ke tab itu', (
     tester,
   ) async {
     await tester.pumpWidget(const MaterialApp(home: MainPage()));
-    await tester.tap(find.text('Riwayat'));
-    await tester.pumpAndSettle();
     await tester.tap(find.text('Pratinjau UI Presensi'));
     await tester.pumpAndSettle();
 
@@ -23,7 +21,7 @@ void main() {
       tester
           .widget<BottomNavigationBar>(find.byType(BottomNavigationBar))
           .currentIndex,
-      2,
+      0,
     );
   });
 

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:absen_kuy/features/home/presentation/pages/main_page.dart';
+import 'package:absen_kuy/features/event/presentation/pages/event_list_page.dart';
+import 'package:absen_kuy/features/history/presentation/pages/attendance_history_page.dart';
 
 void main() {
   Widget buildMain() => const MaterialApp(home: MainPage());
@@ -41,13 +43,15 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(currentIndex(tester), index);
-      // IndexedStack: judul halaman yang terlihat harus sesuai tab aktif.
+      // Riwayat dan Kegiatan sekarang memakai halaman asli, bukan placeholder.
+      final page = switch (index) {
+        1 => find.byType(EventListPage),
+        2 => find.byType(AttendanceHistoryPage),
+        _ => find.text('Profil'),
+      };
       expect(
         find
-            .descendant(
-              of: find.byType(IndexedStack),
-              matching: find.text(labels[index]),
-            )
+            .descendant(of: find.byType(IndexedStack), matching: page)
             .hitTestable(),
         findsOneWidget,
       );
