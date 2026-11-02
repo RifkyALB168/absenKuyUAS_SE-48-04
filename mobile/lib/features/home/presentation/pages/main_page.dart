@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../attendance/presentation/pages/presensi_selfie_page.dart';
+
 /// Halaman utama setelah login, berisi 4 tab dengan BottomNavigationBar
 /// sesuai desain Figma (frame "Nav - Destination count: 4").
 ///
@@ -26,7 +28,11 @@ class _MainPageState extends State<MainPage> {
     _TabItem(
       label: 'Kegiatan',
       icon: Icons.groups_rounded,
-      page: _TabPlaceholder(title: 'Kegiatan', icon: Icons.groups_rounded),
+      page: _TabPlaceholder(
+        title: 'Kegiatan',
+        icon: Icons.groups_rounded,
+        action: _PresensiPreviewButton(),
+      ),
     ),
     // Riwayat kehadiran (Daniartha, M6)
     _TabItem(
@@ -103,10 +109,11 @@ class _TabItem {
 
 /// Isi sementara sebuah tab sampai halaman aslinya dibuat.
 class _TabPlaceholder extends StatelessWidget {
-  const _TabPlaceholder({required this.title, required this.icon});
+  const _TabPlaceholder({required this.title, required this.icon, this.action});
 
   final String title;
   final IconData icon;
+  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
@@ -130,11 +137,25 @@ class _TabPlaceholder extends StatelessWidget {
               'Halaman ini sedang dikembangkan',
               style: textTheme.bodyMedium?.copyWith(color: _navInactive),
             ),
+            if (action != null) ...[const SizedBox(height: 16), action!],
           ],
         ),
       ),
     );
   }
+}
+
+class _PresensiPreviewButton extends StatelessWidget {
+  const _PresensiPreviewButton();
+
+  @override
+  Widget build(BuildContext context) => OutlinedButton.icon(
+    onPressed: () => Navigator.of(
+      context,
+    ).push<void>(MaterialPageRoute(builder: (_) => const PresensiSelfiePage())),
+    icon: const Icon(Icons.photo_camera_outlined),
+    label: const Text('Pratinjau UI Presensi'),
+  );
 }
 
 // Warna dari desain Figma; dipindah ke core/theme saat tema bersama tersedia.
