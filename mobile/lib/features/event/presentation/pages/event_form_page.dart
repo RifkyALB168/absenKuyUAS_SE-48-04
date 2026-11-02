@@ -12,7 +12,7 @@ import 'geofence_picker_page.dart';
 /// nilainya diambil dari [mock_kegiatan.dart]; belum ada penyimpanan,
 /// validasi, atau panggilan jaringan.
 ///
-/// Kartu "Titik Lokasi & Radius" membuka pemilih lokasi M5
+/// Kartu "Titik Lokasi & Radius" membuka pemilih titik & radius geofence
 /// ([GeofencePickerPage]), sesuai lingkup M3 "pilih lokasi di peta".
 class EventFormPage extends StatelessWidget {
   const EventFormPage({super.key});
@@ -82,7 +82,7 @@ class EventFormPage extends StatelessWidget {
           const _SectionCard(
             icon: Icons.schedule,
             title: 'Jadwal & Waktu Presensi',
-            subtitle: 'Sinkronisasi server kampus (M3.1)',
+            subtitle: 'Sinkronisasi server kampus',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -98,7 +98,7 @@ class EventFormPage extends StatelessWidget {
           const _SectionCard(
             icon: Icons.place_outlined,
             title: 'Titik Lokasi & Radius',
-            subtitle: 'Peta geofence (M5)',
+            subtitle: 'Peta geofence',
             child: _LocationSummary(),
           ),
           const SizedBox(height: 20),
@@ -419,7 +419,7 @@ class _SyncNote extends StatelessWidget {
   );
 }
 
-/// Ringkasan lokasi dan radius, dengan tombol menuju pemilih lokasi M5.
+/// Ringkasan lokasi dan radius, dengan tombol menuju pemilih titik & radius.
 class _LocationSummary extends StatelessWidget {
   const _LocationSummary();
 

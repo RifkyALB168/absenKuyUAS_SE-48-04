@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
-/// Peta M5 (pilih titik & radius geofence).
+/// Peta titik & radius geofence.
 ///
 /// Peta digambar manual dengan [CustomPaint] supaya layar bisa jalan tanpa
 /// Google Maps API key. Tidak ada gestur, tidak ada kamera, dan tidak ada
 /// permintaan jaringan: semua bentuknya tetap.
 ///
-/// Saat M5 dikerjakan sungguhan, ganti [Positioned.fill] di [_MapCanvas]
+/// Saat peta sungguhan dipakai, ganti [Positioned.fill] di [_MapCanvas]
 /// dengan widget `GoogleMap` dan biarkan overlay di atasnya apa adanya.
 class GeofenceMapPreview extends StatelessWidget {
   const GeofenceMapPreview({

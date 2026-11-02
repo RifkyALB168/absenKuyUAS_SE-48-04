@@ -5,7 +5,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../mock/mock_kegiatan.dart';
 import '../widgets/geofence_map_preview.dart';
 
-/// Halaman "Pilih Titik & Radius Geofence" (M5).
+/// Halaman "Pilih Titik & Radius Geofence".
 ///
 /// Semua nilai tetap: radius, alamat, dan koordinat diambil dari
 /// [mock_kegiatan.dart]. Belum ada state, geocoding, atau peta sungguhan;

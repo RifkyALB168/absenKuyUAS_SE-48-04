@@ -76,7 +76,7 @@ const String mockDeskripsiKegiatan =
 const String mockJudulKegiatan = 'Weekly Riset & Development';
 const String mockTanggalKegiatan = 'Jumat, 24 Okt 2026';
 
-/// Isi awal untuk layar M5 (pilih titik & radius geofence).
+/// Isi awal untuk layar pilih titik & radius geofence.
 const String mockAlamatGeocoding =
     'Gedung Student Center, Jl. Telekomunikasi';
 const String mockKoordinatLat = '-6.973210';
