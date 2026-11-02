@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Samakan dengan warna latar SplashPage (Flutter) agar tidak ada lompatan warna saat start -->
-    <color name="splash_background">#2563EB</color>
+    <color name="splash_background">#FFFFFF</color>
 </resources>

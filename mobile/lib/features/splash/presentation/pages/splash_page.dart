@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 /// Halaman pembuka yang tampil sesaat ketika aplikasi dibuka.
 ///
@@ -65,62 +64,62 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final pixelRatio = MediaQuery.devicePixelRatioOf(context);
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
-      child: Scaffold(
-        backgroundColor: colorScheme.primary,
-        body: SafeArea(
-          child: SizedBox(
-            width: double.infinity,
-            child: Column(
-              children: [
-                const Spacer(),
-                Container(
-                  width: 96,
-                  height: 96,
-                  decoration: BoxDecoration(
-                    color: colorScheme.onPrimary,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Icon(
-                    Icons.where_to_vote_rounded,
-                    size: 56,
-                    color: colorScheme.primary,
-                  ),
+    // Latar putih disamakan dengan @color/splash_background di Android
+    // (res/values/colors.xml); ikon status bar gelap mengikuti default di app.dart.
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: SizedBox(
+          width: double.infinity,
+          child: Column(
+            children: [
+              const Spacer(),
+              Image.asset(
+                'assets/images/logo.webp',
+                width: _logoSize,
+                height: _logoSize,
+                // Logo asli 2000 px; cukup didekode seukuran tampilannya.
+                cacheWidth: (_logoSize * pixelRatio).round(),
+                semanticLabel: 'Logo absenKuy',
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'absenKuy',
+                style: textTheme.headlineMedium?.copyWith(
+                  color: _logoNavy,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: 24),
-                Text(
-                  'absenKuy',
-                  style: textTheme.headlineMedium?.copyWith(
-                    color: colorScheme.onPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Presensi kegiatan UKM & organisasi',
+                style: textTheme.bodyMedium?.copyWith(
+                  color: _logoNavy.withValues(alpha: 0.7),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Presensi kegiatan UKM & organisasi',
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onPrimary.withValues(alpha: 0.85),
-                  ),
+              ),
+              const Spacer(),
+              const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: _logoOrange,
                 ),
-                const Spacer(),
-                SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: colorScheme.onPrimary,
-                  ),
-                ),
-                const SizedBox(height: 48),
-              ],
-            ),
+              ),
+              const SizedBox(height: 48),
+            ],
           ),
         ),
       ),
     );
   }
 }
+
+const double _logoSize = 160;
+
+// Diambil dari warna logo (assets/images/logo.webp).
+const Color _logoNavy = Color(0xFF1C3C78);
+const Color _logoOrange = Color(0xFFF36E19);
