@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('pratinjau dibuka dari Kegiatan dan ditutup kembali ke tab itu', (
+  testWidgets('pratinjau dibuka dari Riwayat dan ditutup kembali ke tab itu', (
     tester,
   ) async {
     await tester.pumpWidget(const MaterialApp(home: MainPage()));
-    await tester.tap(find.text('Kegiatan'));
+    await tester.tap(find.text('Riwayat'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Pratinjau UI Presensi'));
     await tester.pumpAndSettle();
@@ -24,7 +24,7 @@ void main() {
       tester
           .widget<BottomNavigationBar>(find.byType(BottomNavigationBar))
           .currentIndex,
-      1,
+      2,
     );
   });
 
