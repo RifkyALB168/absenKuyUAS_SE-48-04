@@ -1,11 +1,44 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-class AttendanceDetailPage extends StatelessWidget {
-  const AttendanceDetailPage({super.key});
+class AttendanceDetailData {
+  final String title;
+  final String date;
+  final String location;
 
+  const AttendanceDetailData({
+    required this.title,
+    required this.date,
+    required this.location,
+  });
+}
+
+class AttendanceDetailPage extends StatelessWidget {
+  final AttendanceDetailData? detailData;
+
+  const AttendanceDetailPage({super.key, this.detailData});
   @override
   Widget build(BuildContext context) {
+    if (detailData == null) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFF8FAFC),
+        appBar: AppBar(
+          backgroundColor: const Color(0xFFFFFFFF),
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Color(0xFF0F172A)),
+          title: const Text(
+            'Detail Kegiatan & Presensi',
+            style: TextStyle(color: Color(0xFF0F172A), fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ),
+        body: const Center(
+          child: Text(
+            'Data tidak ditemukan',
+            style: TextStyle(color: Color(0xFF64748B), fontSize: 16),
+          ),
+        ),
+      );
+    }
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
@@ -15,7 +48,7 @@ class AttendanceDetailPage extends StatelessWidget {
         surfaceTintColor: Colors.transparent,
         leading: const BackButton(color: Color(0xFF0F172A)),
         titleSpacing: 0,
-        title: const Column(
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -28,14 +61,7 @@ class AttendanceDetailPage extends StatelessWidget {
               ),
             ),
             SizedBox(height: 2),
-            Text(
-              'Rapat Pleno & Evaluasi Mingguan',
-              style: TextStyle(
-                color: Color(0xFF64748B),
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
+            Text(detailData!.title, style: const TextStyle(color: Color(0xFF64748B), fontSize: 12)),
           ],
         ),
         bottom: const PreferredSize(
@@ -69,7 +95,7 @@ class AttendanceDetailPage extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Simulated Map Area (Building footprint box)
+          // Simulated Map Area 
           Positioned(
             top: 14,
             child: Container(
@@ -181,7 +207,7 @@ class AttendanceDetailPage extends StatelessWidget {
                       ),
                     ),
 
-                    // User Location Marker (with pulse rings)
+                    // User Location Marker 
                     Positioned(
                       bottom: 26,
                       left: 30,
@@ -262,7 +288,7 @@ class AttendanceDetailPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
 
-          // Middle Part: ListTile 1 (Jadwal Acara)
+          // Middle Part: ListTile 1 (schedule)
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 4),
             minVerticalPadding: 8,
@@ -288,10 +314,10 @@ class AttendanceDetailPage extends StatelessWidget {
                 letterSpacing: 0.5,
               ),
             ),
-            subtitle: const Padding(
+            subtitle: Padding(
               padding: EdgeInsets.only(top: 2),
               child: Text(
-                'Jumat, 24 Oktober 2026 • 15:30 - 17:30 WIB',
+                detailData!.date,
                 style: TextStyle(
                   color: Color(0xFF0F172A),
                   fontSize: 14,
@@ -301,7 +327,8 @@ class AttendanceDetailPage extends StatelessWidget {
             ),
           ),
 
-          // Bottom Part: ListTile 2 (Lokasi Terverifikasi)
+          
+          // Bottom Part: ListTile 2 (verified loc)
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 4),
             minVerticalPadding: 8,
@@ -328,20 +355,20 @@ class AttendanceDetailPage extends StatelessWidget {
                 letterSpacing: 0.5,
               ),
             ),
-            subtitle: const Padding(
-              padding: EdgeInsets.only(top: 2),
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 2),
               child: Text.rich(
                 TextSpan(
                   children: [
                     TextSpan(
-                      text: 'Gedung Tokong Nanas (TULT) Lt. 3\n',
-                      style: TextStyle(
+                      text: '${detailData!.location}\n',
+                      style: const TextStyle(
                         color: Color(0xFF0F172A),
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    TextSpan(
+                    const TextSpan(
                       text: 'Jl. Telekomunikasi No. 1, Terusan Buahbatu,',
                       style: TextStyle(
                         color: Color(0xFF64748B),

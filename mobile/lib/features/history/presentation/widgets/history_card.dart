@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/attendance_history_item.dart';
+import '../pages/attendance_detail_page.dart';
 import 'status_badge.dart';
 import 'thumbnail_icon.dart';
 
-/// Kartu riwayat kehadiran
 class HistoryCard extends StatelessWidget {
   final AttendanceHistoryItem data;
+  final AttendanceDetailData? detailData;
 
   const HistoryCard({
     super.key,
     required this.data,
+    this.detailData,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(14),
@@ -32,60 +33,79 @@ class HistoryCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Thumbnail / Ikon di kiri
-          ThumbnailIcon(type: data.thumbnailType),
-          const SizedBox(width: 12),
-
-          // Kolom Title, Date, Subtitle di tengah (Expanded)
-          Expanded(
-            child: Column(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AttendanceDetailPage(
+                  detailData: detailData,
+                ),
+              ),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (data.organization != null) ...[
-                  Text(
-                    data.organization!,
-                    style: const TextStyle(
-                      color: Color(0xFF2563EB),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                ],
-                Text(
-                  data.title,
-                  style: const TextStyle(
-                    color: Color(0xFF0F172A),
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
+                // Thumbnail / Ikon di kiri
+                ThumbnailIcon(type: data.thumbnailType),
+                const SizedBox(width: 12),
+
+                // Kolom Title, Date, Subtitle
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (data.organization != null) ...[
+                        Text(
+                          data.organization!,
+                          style: const TextStyle(
+                            color: Color(0xFF2563EB),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                      ],
+                      Text(
+                        data.title,
+                        style: const TextStyle(
+                          color: Color(0xFF0F172A),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        data.date,
+                        style: const TextStyle(
+                          color: Color(0xFF64748B),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      _buildSubtitleContent(data),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  data.date,
-                  style: const TextStyle(
-                    color: Color(0xFF64748B),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
+                const SizedBox(width: 8),
+
+                // Status Badge
+                StatusBadge(
+                  text: data.badgeText,
+                  textColor: data.badgeTextColor,
+                  backgroundColor: data.badgeBackgroundColor,
                 ),
-                const SizedBox(height: 8),
-                _buildSubtitleContent(data),
               ],
             ),
           ),
-          const SizedBox(width: 8),
-
-          // Status Badge di kanan atas
-          StatusBadge(
-            text: data.badgeText,
-            textColor: data.badgeTextColor,
-            backgroundColor: data.badgeBackgroundColor,
-          ),
-        ],
+        ),
       ),
     );
   }
