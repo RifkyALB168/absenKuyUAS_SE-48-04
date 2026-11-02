@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../attendance/presentation/pages/presensi_selfie_page.dart';
 import '../../../event/presentation/pages/event_list_page.dart';
 
 /// Halaman utama setelah login, berisi 4 tab dengan BottomNavigationBar
@@ -35,11 +34,7 @@ class _MainPageState extends State<MainPage> {
     _TabItem(
       label: 'Riwayat',
       icon: Icons.history_rounded,
-      page: _TabPlaceholder(
-        title: 'Riwayat',
-        icon: Icons.history_rounded,
-        action: _PresensiPreviewButton(),
-      ),
+      page: _TabPlaceholder(title: 'Riwayat', icon: Icons.history_rounded),
     ),
     // Profil pengguna (Affan, M1)
     _TabItem(
@@ -110,11 +105,10 @@ class _TabItem {
 
 /// Isi sementara sebuah tab sampai halaman aslinya dibuat.
 class _TabPlaceholder extends StatelessWidget {
-  const _TabPlaceholder({required this.title, required this.icon, this.action});
+  const _TabPlaceholder({required this.title, required this.icon});
 
   final String title;
   final IconData icon;
-  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
@@ -133,30 +127,11 @@ class _TabPlaceholder extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              'Halaman ini sedang dikembangkan',
-              style: textTheme.bodyMedium?.copyWith(color: _navInactive),
-            ),
-            if (action != null) ...[const SizedBox(height: 16), action!],
           ],
         ),
       ),
     );
   }
-}
-
-class _PresensiPreviewButton extends StatelessWidget {
-  const _PresensiPreviewButton();
-
-  @override
-  Widget build(BuildContext context) => OutlinedButton.icon(
-    onPressed: () => Navigator.of(
-      context,
-    ).push<void>(MaterialPageRoute(builder: (_) => const PresensiSelfiePage())),
-    icon: const Icon(Icons.photo_camera_outlined),
-    label: const Text('Pratinjau UI Presensi'),
-  );
 }
 
 // Warna dari desain Figma; dipindah ke core/theme saat tema bersama tersedia.

@@ -150,19 +150,9 @@ class PresensiBerhasilDialog extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Pratinjau UI · Data contoh\nSimulasi tampilan; data belum disimpan.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Color(0xFF596574),
-                fontSize: 11,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 4),
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Tutup pratinjau'),
+              child: const Text('Tutup'),
             ),
           ],
         ),

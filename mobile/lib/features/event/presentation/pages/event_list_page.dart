@@ -78,7 +78,6 @@ class EventListPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
           ],
-          const _MockupNote(),
         ],
       ),
     );
@@ -128,37 +127,6 @@ class _FilterRow extends StatelessWidget {
           ),
         ),
       ),
-    ),
-  );
-}
-
-/// Penanda bahwa layar ini mockup tanpa fungsi.
-class _MockupNote extends StatelessWidget {
-  const _MockupNote();
-
-  @override
-  Widget build(BuildContext context) => Container(
-    decoration: BoxDecoration(
-      color: AppColors.primaryTint,
-      borderRadius: BorderRadius.circular(AppTheme.controlRadius),
-    ),
-    padding: const EdgeInsets.all(12),
-    child: const Row(
-      children: <Widget>[
-        Icon(Icons.brush_outlined, size: 15, color: AppColors.primary),
-        SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            'Mockup UI M3/M5: data contoh, belum tersambung ke server.',
-            style: TextStyle(
-              fontSize: 10,
-              height: 1.35,
-              color: AppColors.primary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ],
     ),
   );
 }
