@@ -16,7 +16,11 @@ void main() {
     await tester.pumpWidget(buildMain());
 
     final nav = find.byType(BottomNavigationBar);
-    for (final label in ['Beranda', 'Riwayat', 'Kelompok', 'Profil']) {
+    expect(
+      tester.widget<BottomNavigationBar>(nav).items.map((item) => item.label),
+      ['Beranda', 'Kegiatan', 'Riwayat', 'Profil'],
+    );
+    for (final label in ['Beranda', 'Kegiatan', 'Riwayat', 'Profil']) {
       expect(
         find.descendant(of: nav, matching: find.text(label)),
         findsOneWidget,
@@ -28,12 +32,26 @@ void main() {
   testWidgets('menekan tab memindahkan halaman yang tampil', (tester) async {
     await tester.pumpWidget(buildMain());
 
-    await tester.tap(find.text('Kelompok'));
-    await tester.pumpAndSettle();
+    final nav = find.byType(BottomNavigationBar);
+    const labels = ['Beranda', 'Kegiatan', 'Riwayat', 'Profil'];
+    for (final index in [1, 2, 3]) {
+      await tester.tap(
+        find.descendant(of: nav, matching: find.text(labels[index])),
+      );
+      await tester.pumpAndSettle();
 
-    expect(currentIndex(tester), 2);
-    // IndexedStack: hanya tab aktif yang terlihat.
-    expect(find.text('Kelompok').hitTestable(), findsNWidgets(2));
+      expect(currentIndex(tester), index);
+      // IndexedStack: judul halaman yang terlihat harus sesuai tab aktif.
+      expect(
+        find
+            .descendant(
+              of: find.byType(IndexedStack),
+              matching: find.text(labels[index]),
+            )
+            .hitTestable(),
+        findsOneWidget,
+      );
+    }
     expect(
       find
           .descendant(
@@ -52,7 +70,7 @@ void main() {
 
     await tester.tap(find.text('Riwayat'));
     await tester.pumpAndSettle();
-    expect(currentIndex(tester), 1);
+    expect(currentIndex(tester), 2);
 
     final handled = await tester.binding.handlePopRoute();
     await tester.pumpAndSettle();

@@ -22,17 +22,17 @@ class _MainPageState extends State<MainPage> {
       icon: Icons.home_rounded,
       page: _TabPlaceholder(title: 'Beranda', icon: Icons.home_rounded),
     ),
+    // Daftar kegiatan (Ibnu, M3)
+    _TabItem(
+      label: 'Kegiatan',
+      icon: Icons.groups_rounded,
+      page: _TabPlaceholder(title: 'Kegiatan', icon: Icons.groups_rounded),
+    ),
     // Riwayat kehadiran (Daniartha, M6)
     _TabItem(
       label: 'Riwayat',
       icon: Icons.history_rounded,
       page: _TabPlaceholder(title: 'Riwayat', icon: Icons.history_rounded),
-    ),
-    // Manajemen kelompok (Khalifa, M2)
-    _TabItem(
-      label: 'Kelompok',
-      icon: Icons.groups_rounded,
-      page: _TabPlaceholder(title: 'Kelompok', icon: Icons.groups_rounded),
     ),
     // Profil pengguna (Affan, M1)
     _TabItem(
@@ -138,6 +138,6 @@ class _TabPlaceholder extends StatelessWidget {
 }
 
 // Warna dari desain Figma; dipindah ke core/theme saat tema bersama tersedia.
-const Color _pageBackground = Color(0xFFF8FAFC);
+const Color _pageBackground = Color(0xFFF7F9FB);
 const Color _navInactive = Color(0xFF374151);
 const Color _navBorder = Color(0xFFE5E7EB);
