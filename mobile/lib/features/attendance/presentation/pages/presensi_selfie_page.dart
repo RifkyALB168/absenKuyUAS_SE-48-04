@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/presensi_berhasil_dialog.dart';
+
 /// Pratinjau UI M4 dengan data contoh; belum mengakses kamera, GPS, atau API.
 class PresensiSelfiePage extends StatelessWidget {
   const PresensiSelfiePage({super.key});
@@ -367,13 +369,24 @@ class _PhotoControls extends StatelessWidget {
         const SizedBox(height: 16),
         FilledButton(
           style: FilledButton.styleFrom(
+            backgroundColor: _blue,
+            foregroundColor: Colors.white,
             minimumSize: const Size.fromHeight(48),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          onPressed: null,
+          onPressed: () => showDialog<void>(
+            context: context,
+            builder: (_) => const PresensiBerhasilDialog(),
+          ),
           child: const Text('Kirim Presensi Sekarang'),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Simulasi hasil · Tidak mengirim data',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: _muted, fontSize: 11),
         ),
       ],
     ),

@@ -1,5 +1,6 @@
 import 'package:absen_kuy/features/attendance/presentation/pages/presensi_selfie_page.dart';
 import 'package:absen_kuy/features/home/presentation/pages/main_page.dart';
+import 'package:absen_kuy/features/attendance/presentation/widgets/presensi_berhasil_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -27,7 +28,7 @@ void main() {
     );
   });
 
-  testWidgets('tombol kamera menjelaskan pratinjau dan Kirim belum aktif', (
+  testWidgets('kamera menjelaskan pratinjau dan Kirim membuka hasil simulasi', (
     tester,
   ) async {
     await tester.pumpWidget(const MaterialApp(home: PresensiSelfiePage()));
@@ -37,10 +38,17 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Pratinjau UI: kamera belum diaktifkan.'), findsOneWidget);
-    expect(
-      tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
-      isNull,
-    );
+    await tester.tap(find.text('Kirim Presensi Sekarang'));
+    await tester.pumpAndSettle();
+    expect(find.byType(PresensiBerhasilDialog), findsOneWidget);
+    expect(find.text('Presensi Berhasil!'), findsOneWidget);
+    expect(find.textContaining('data belum disimpan'), findsOneWidget);
+    expect(find.text('24 Okt 2026, 15:40:12 WIB'), findsOneWidget);
+
+    await tester.tap(find.text('Tutup pratinjau'));
+    await tester.pumpAndSettle();
+    expect(find.byType(PresensiBerhasilDialog), findsNothing);
+    expect(find.byType(PresensiSelfiePage), findsOneWidget);
   });
 
   testWidgets('layar kecil dan teks besar tetap dapat digulir tanpa overflow', (
@@ -65,6 +73,14 @@ void main() {
     await tester.ensureVisible(find.text('Kirim Presensi Sekarang'));
     await tester.pumpAndSettle();
     expect(find.text('Kirim Presensi Sekarang').hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.text('Kirim Presensi Sekarang'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.ensureVisible(find.text('Tutup pratinjau'));
+    await tester.tap(find.text('Tutup pratinjau'));
+    await tester.pumpAndSettle();
+    expect(find.byType(PresensiBerhasilDialog), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }
