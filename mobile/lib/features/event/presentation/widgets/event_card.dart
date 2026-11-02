@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../mock/mock_kegiatan.dart';
+import '../pages/kegiatan.dart';
 
 /// Kartu satu kegiatan pada daftar M3.
 ///
-/// Hanya menampilkan data dari [MockKegiatan]; tidak ada aksi selain
+/// Hanya menampilkan data dari [Kegiatan]; tidak ada aksi selain
 /// [onTap] opsional.
 class EventCard extends StatelessWidget {
   const EventCard({super.key, required this.kegiatan, this.onTap});
 
-  final MockKegiatan kegiatan;
+  final Kegiatan kegiatan;
   final VoidCallback? onTap;
 
   @override
@@ -135,26 +135,26 @@ class _Chip extends StatelessWidget {
   );
 }
 
-/// Chip status kegiatan dengan warna sesuai [MockStatusKegiatan].
+/// Chip status kegiatan dengan warna sesuai [StatusKegiatan].
 class _StatusChip extends StatelessWidget {
   const _StatusChip({required this.status});
 
-  final MockStatusKegiatan status;
+  final StatusKegiatan status;
 
   @override
   Widget build(BuildContext context) {
     final (String label, Color fg, Color bg) = switch (status) {
-      MockStatusKegiatan.berlangsung => (
+      StatusKegiatan.berlangsung => (
         'Berlangsung',
         AppColors.success,
         AppColors.successTint,
       ),
-      MockStatusKegiatan.dijadwalkan => (
+      StatusKegiatan.dijadwalkan => (
         'Dijadwalkan',
         AppColors.primary,
         AppColors.primaryTint,
       ),
-      MockStatusKegiatan.ditutup => (
+      StatusKegiatan.ditutup => (
         'Ditutup',
         AppColors.textSecondary,
         AppColors.background,

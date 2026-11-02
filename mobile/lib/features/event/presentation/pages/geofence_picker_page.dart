@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../mock/mock_kegiatan.dart';
+import 'kegiatan.dart';
 import '../widgets/geofence_map_preview.dart';
 
 /// Halaman "Pilih Titik & Radius Geofence".
 ///
 /// Semua nilai tetap: radius, alamat, dan koordinat diambil dari
-/// [mock_kegiatan.dart]. Belum ada state, geocoding, atau peta sungguhan;
+/// [kegiatan.dart]. Belum ada state, geocoding, atau peta sungguhan;
 /// lihat [GeofenceMapPreview].
 class GeofencePickerPage extends StatelessWidget {
   const GeofencePickerPage({super.key});
@@ -39,7 +39,7 @@ class GeofencePickerPage extends StatelessWidget {
         children: <Widget>[
           Expanded(
             child: GeofenceMapPreview(
-              radiusMeter: mockRadiusMeter,
+              radiusMeter: radiusMeter,
               centerLabel: 'Student Center',
             ),
           ),
@@ -201,7 +201,7 @@ class _AddressRow extends StatelessWidget {
             ),
             SizedBox(height: 3),
             Text(
-              mockAlamatGeocoding,
+              alamatGeocoding,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
@@ -264,9 +264,9 @@ class _CoordinateRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
     children: <Widget>[
-      const Expanded(child: _CoordinateField(label: 'Lat', value: mockKoordinatLat)),
+      const Expanded(child: _CoordinateField(label: 'Lat', value: koordinatLat)),
       const SizedBox(width: 10),
-      const Expanded(child: _CoordinateField(label: 'Lng', value: mockKoordinatLng)),
+      const Expanded(child: _CoordinateField(label: 'Lng', value: koordinatLng)),
       const SizedBox(width: 6),
       TextButton(
         onPressed: () {},
@@ -347,7 +347,7 @@ class _RadiusHeader extends StatelessWidget {
           borderRadius: BorderRadius.circular(100),
         ),
         child: Text(
-          '$mockRadiusMeter Meter',
+          '$radiusMeter Meter',
           style: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
@@ -389,14 +389,14 @@ class _RadiusChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Row(
     children: <Widget>[
-      for (final int meter in mockRadiusPilihan) ...<Widget>[
+      for (final int meter in radiusPilihan) ...<Widget>[
         Expanded(
           child: _RadiusChip(
             meter: meter,
-            active: meter == mockRadiusMeter,
+            active: meter == radiusMeter,
           ),
         ),
-        if (meter != mockRadiusPilihan.last) const SizedBox(width: 8),
+        if (meter != radiusPilihan.last) const SizedBox(width: 8),
       ],
     ],
   );

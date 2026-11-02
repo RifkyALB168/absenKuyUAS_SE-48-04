@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../mock/mock_kegiatan.dart';
+import 'kegiatan.dart';
 import 'geofence_picker_page.dart';
 
 /// Halaman "Buat Kegiatan Baru" (M3).
 ///
 /// Mengikuti desain "Buat Kegiatan": kartu Informasi Kegiatan, kartu Jadwal &
 /// Waktu Presensi, lalu tombol Simpan & Jadwalkan. Isian masih readOnly dan
-/// nilainya diambil dari [mock_kegiatan.dart]; belum ada penyimpanan,
+/// nilainya diambil dari [kegiatan.dart]; belum ada penyimpanan,
 /// validasi, atau panggilan jaringan.
 ///
 /// Kartu "Titik Lokasi & Radius" membuka pemilih titik & radius geofence
@@ -70,11 +70,11 @@ class EventFormPage extends StatelessWidget {
                 SizedBox(height: 16),
                 _LabelText('Judul Kegiatan'),
                 SizedBox(height: 8),
-                _FilledField(value: mockJudulKegiatan),
+                _FilledField(value: judulKegiatan),
                 SizedBox(height: 16),
                 _LabelRow(label: 'Deskripsi & Agenda', muted: 'Optional'),
                 SizedBox(height: 8),
-                _FilledField(value: mockDeskripsiKegiatan, lines: 5),
+                _FilledField(value: deskripsiKegiatan, lines: 5),
               ],
             ),
           ),
@@ -90,7 +90,7 @@ class EventFormPage extends StatelessWidget {
                 SizedBox(height: 16),
                 _LabelText('Tanggal Kegiatan'),
                 SizedBox(height: 8),
-                _DateField(value: mockTanggalKegiatan),
+                _DateField(value: tanggalKegiatan),
               ],
             ),
           ),
@@ -433,7 +433,7 @@ class _LocationSummary extends StatelessWidget {
           const SizedBox(width: 6),
           const Expanded(
             child: Text(
-              mockAlamatGeocoding,
+              alamatGeocoding,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -448,7 +448,7 @@ class _LocationSummary extends StatelessWidget {
               borderRadius: BorderRadius.circular(100),
             ),
             child: Text(
-              '$mockRadiusMeter m',
+              '$radiusMeter m',
               style: const TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w700,

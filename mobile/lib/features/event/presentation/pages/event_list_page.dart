@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../mock/mock_kegiatan.dart';
+import 'kegiatan.dart';
 import '../widgets/event_card.dart';
 import 'event_form_page.dart';
 
 /// Daftar kegiatan (M3).
 ///
 /// Judul halaman mengikuti desain "Kegiatan: Kelola Kegiatan & Aktivitasmu".
-/// Isinya data tetap dari [mock_kegiatan]; aksinya membuka form M3
+/// Isinya data tetap dari [daftarKegiatan]; aksinya membuka form M3
 /// ([EventFormPage]).
 class EventListPage extends StatelessWidget {
   const EventListPage({super.key});
@@ -70,7 +70,7 @@ class EventListPage extends StatelessWidget {
           const SizedBox(height: 16),
           const _FilterRow(),
           const SizedBox(height: 14),
-          for (final MockKegiatan kegiatan in mockKegiatan) ...<Widget>[
+          for (final Kegiatan kegiatan in daftarKegiatan) ...<Widget>[
             EventCard(
               kegiatan: kegiatan,
               onTap: () => _openForm(context),
