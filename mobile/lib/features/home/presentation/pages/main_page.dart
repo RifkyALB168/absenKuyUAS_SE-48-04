@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../attendance/presentation/pages/presensi_selfie_page.dart';
+import '../../../history/presentation/pages/attendance_history_page.dart';
 
 /// Halaman utama setelah login, berisi 4 tab dengan BottomNavigationBar
 /// sesuai desain Figma (frame "Nav - Destination count: 4").
@@ -38,7 +39,7 @@ class _MainPageState extends State<MainPage> {
     _TabItem(
       label: 'Riwayat',
       icon: Icons.history_rounded,
-      page: _TabPlaceholder(title: 'Riwayat', icon: Icons.history_rounded),
+      page: AttendanceHistoryPage(),
     ),
     // Profil pengguna (Affan, M1)
     _TabItem(
