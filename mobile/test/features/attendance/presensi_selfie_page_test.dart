@@ -1,33 +1,30 @@
 import 'package:absen_kuy/features/attendance/presentation/pages/presensi_selfie_page.dart';
 import 'package:absen_kuy/features/attendance/presentation/widgets/presensi_berhasil_dialog.dart';
+import 'package:absen_kuy/features/home/presentation/pages/main_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('tombol tutup kembali ke halaman sebelumnya', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Builder(
-          builder: (context) => TextButton(
-            onPressed: () => Navigator.of(context).push<void>(
-              MaterialPageRoute<void>(
-                builder: (_) => const PresensiSelfiePage(),
-              ),
-            ),
-            child: const Text('Buka presensi'),
-          ),
-        ),
-      ),
-    );
-
-    await tester.tap(find.text('Buka presensi'));
+  testWidgets('presensi dibuka dari Riwayat dan ditutup kembali ke tab itu', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: MainPage()));
+    await tester.tap(find.text('Riwayat'));
     await tester.pumpAndSettle();
+    await tester.tap(find.text('Pratinjau UI Presensi'));
+    await tester.pumpAndSettle();
+
     expect(find.text('Kamera Presensi Selfie'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Tutup presensi'));
     await tester.pumpAndSettle();
     expect(find.byType(PresensiSelfiePage), findsNothing);
-    expect(find.text('Buka presensi'), findsOneWidget);
+    expect(
+      tester
+          .widget<BottomNavigationBar>(find.byType(BottomNavigationBar))
+          .currentIndex,
+      2,
+    );
   });
 
   testWidgets('kirim presensi membuka dialog hasil dan dapat ditutup', (
