@@ -82,7 +82,7 @@ class EventFormPage extends StatelessWidget {
           const _SectionCard(
             icon: Icons.schedule,
             title: 'Jadwal & Waktu Presensi',
-            subtitle: 'Sinkronisasi server kampus (PRD M3.1)',
+            subtitle: 'Sinkronisasi server kampus (M3.1)',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -98,7 +98,7 @@ class EventFormPage extends StatelessWidget {
           const _SectionCard(
             icon: Icons.place_outlined,
             title: 'Titik Lokasi & Radius',
-            subtitle: 'Peta geofence (PRD M5)',
+            subtitle: 'Peta geofence (M5)',
             child: _LocationSummary(),
           ),
           const SizedBox(height: 20),
