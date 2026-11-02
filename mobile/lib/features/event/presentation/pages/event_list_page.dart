@@ -1,221 +1,164 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../domain/entities/event.dart';
-import '../../domain/repositories/event_repository.dart';
-import '../bloc/event_list_bloc.dart';
-import '../bloc/event_list_event.dart';
-import '../bloc/event_list_state.dart';
-import '../event_dependencies.dart';
+import '../mock/mock_kegiatan.dart';
 import '../widgets/event_card.dart';
-import 'event_detail_page.dart';
 import 'event_form_page.dart';
 
-/// Daftar kegiatan kelompok (M3.3) dan pintu masuk kelola kegiatan (M3.1, M3.4).
+/// Mockup M3 — daftar kegiatan.
 ///
-/// Sementara memakai repositori dummy lewat [eventRepository]; ganti dengan
-/// `EventRepositoryImpl` saat backend REST siap tanpa mengubah halaman ini.
-class EventListPage extends StatefulWidget {
-  const EventListPage({super.key, this.repository});
-
-  /// Diisi pada pengujian; default memakai [eventRepository].
-  final EventRepository? repository;
-
-  @override
-  State<EventListPage> createState() => _EventListPageState();
-}
-
-class _EventListPageState extends State<EventListPage> {
-  late final EventRepository _repository = widget.repository ?? eventRepository;
-  late final EventListBloc _bloc = EventListBloc(_repository);
-
-  @override
-  void initState() {
-    super.initState();
-    _bloc.add(const EventListLoadRequested());
-  }
-
-  @override
-  void dispose() {
-    _bloc.close();
-    super.dispose();
-  }
+/// Judul halaman mengikuti desain "Kegiatan: Kelola Kegiatan & Aktivitasmu".
+/// Isinya data tetap dari [mock_kegiatan]; tidak ada pemuatan, pencarian, atau
+/// penyimpanan. Satu-satunya aksi adalah membuka mockup form M3
+/// ([EventFormPage]).
+class EventListPage extends StatelessWidget {
+  const EventListPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<EventListBloc>.value(
-      value: _bloc,
-      child: BlocConsumer<EventListBloc, EventListState>(
-        listener: (BuildContext context, EventListState state) {
-          final String? message = state.lastMessage;
-          if (message != null) {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text(message)));
-          }
-        },
-        builder: (BuildContext context, EventListState state) {
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text('Kegiatan'),
-              actions: <Widget>[
-                IconButton(
-                  icon: const Icon(Icons.refresh),
-                  tooltip: 'Muat ulang',
-                  onPressed: () => _bloc.add(const EventListLoadRequested()),
-                ),
-              ],
-            ),
-            floatingActionButton: FloatingActionButton.extended(
-              onPressed: () => _openForm(),
-              icon: const Icon(Icons.add),
-              label: const Text('Buat Kegiatan'),
-            ),
-            body: _buildBody(context, state),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildBody(BuildContext context, EventListState state) {
-    if (state.isLoading && state.events.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (state.isFailure && state.events.isEmpty) {
-      return _ErrorView(
-        message: state.errorMessage ?? 'Gagal memuat kegiatan',
-        onRetry: () => _bloc.add(const EventListLoadRequested()),
-      );
-    }
-
-    if (state.isEmpty) {
-      return const _EmptyView();
-    }
-
-    return RefreshIndicator(
-      onRefresh: () async => _bloc.add(const EventListLoadRequested()),
-      child: ListView.separated(
-        padding: const EdgeInsets.fromLTRB(
-          AppTheme.gap,
-          AppTheme.gap,
-          AppTheme.gap,
-          96,
-        ),
-        itemCount: state.events.length,
-        separatorBuilder: (_, _) => const SizedBox(height: 12),
-        itemBuilder: (BuildContext context, int index) {
-          final Event event = state.events[index];
-          return EventCard(event: event, onTap: () => _openDetail(event));
-        },
-      ),
-    );
-  }
-
-  Future<void> _openForm({Event? event}) async {
-    final Event? result = await Navigator.of(context).push<Event>(
-      MaterialPageRoute<Event>(
-        builder: (_) => EventFormPage(repository: _repository, event: event),
-      ),
-    );
-    if (result == null) return;
-    if (event == null) {
-      _bloc.add(EventAdded(result));
-    } else {
-      _bloc.add(EventChanged(result));
-    }
-  }
-
-  Future<void> _openDetail(Event event) async {
-    final EventDetailResult? result = await Navigator.of(context)
-        .push<EventDetailResult>(
-          MaterialPageRoute<EventDetailResult>(
-            builder: (_) =>
-                EventDetailPage(event: event, repository: _repository),
-          ),
-        );
-    if (result == null) return;
-    if (result.deleted) {
-      _bloc.add(EventRemoved(event.id));
-      return;
-    }
-    final Event? updated = result.updated;
-    if (updated != null) {
-      _bloc.add(EventChanged(updated));
-    }
-  }
-}
-
-class _EmptyView extends StatelessWidget {
-  const _EmptyView();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Padding(
-        padding: EdgeInsets.all(24),
-        child: Column(
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        toolbarHeight: 66,
+        automaticallyImplyLeading: false,
+        title: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(
-              Icons.event_busy_outlined,
-              size: 48,
-              color: AppColors.textSecondary,
-            ),
-            SizedBox(height: 12),
             Text(
-              'Belum Ada Kegiatan',
+              'Kegiatan',
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
               ),
             ),
-            SizedBox(height: 6),
+            SizedBox(height: 2),
             Text(
-              'Pengurus kelompok belum menjadwalkan kegiatan baru.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.textSecondary),
+              'Kelola Kegiatan & Aktivitasmu',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),
       ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
+        children: <Widget>[
+          SizedBox(
+            width: double.infinity,
+            height: 46,
+            child: FilledButton.icon(
+              onPressed: () => _openForm(context),
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: AppColors.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.controlRadius),
+                ),
+              ),
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text(
+                'Buat Kegiatan',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const _FilterRow(),
+          const SizedBox(height: 14),
+          for (final MockKegiatan kegiatan in mockKegiatan) ...<Widget>[
+            EventCard(
+              kegiatan: kegiatan,
+              onTap: () => _openForm(context),
+            ),
+            const SizedBox(height: 12),
+          ],
+          const _MockupNote(),
+        ],
+      ),
+    );
+  }
+
+  void _openForm(BuildContext context) {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(builder: (_) => const EventFormPage()),
     );
   }
 }
 
-class _ErrorView extends StatelessWidget {
-  const _ErrorView({required this.message, required this.onRetry});
+/// Chip penyaring daftar. Hanya tampilan; tidak ada penyaringan.
+class _FilterRow extends StatelessWidget {
+  const _FilterRow();
 
-  final String message;
-  final VoidCallback onRetry;
+  static const List<String> _labels = <String>[
+    'Semua (3)',
+    'Dijadwalkan',
+    'Berlangsung',
+    'Ditutup',
+  ];
 
   @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Icon(
-              Icons.cloud_off_outlined,
-              size: 48,
-              color: AppColors.error,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 16),
-            FilledButton(onPressed: onRetry, child: const Text('Coba Lagi')),
-          ],
+  Widget build(BuildContext context) => SizedBox(
+    height: 32,
+    child: ListView.separated(
+      scrollDirection: Axis.horizontal,
+      itemCount: _labels.length,
+      separatorBuilder: (_, _) => const SizedBox(width: 8),
+      itemBuilder: (BuildContext context, int index) => Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: index == 0 ? AppColors.primary : AppColors.surface,
+          borderRadius: BorderRadius.circular(100),
+          border: Border.all(
+            color: index == 0 ? AppColors.primary : AppColors.border,
+          ),
+        ),
+        child: Text(
+          _labels[index],
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: index == 0 ? AppColors.surface : AppColors.textSecondary,
+          ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
+/// Penanda bahwa layar ini mockup tanpa fungsi.
+class _MockupNote extends StatelessWidget {
+  const _MockupNote();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    decoration: BoxDecoration(
+      color: AppColors.primaryTint,
+      borderRadius: BorderRadius.circular(AppTheme.controlRadius),
+    ),
+    padding: const EdgeInsets.all(12),
+    child: const Row(
+      children: <Widget>[
+        Icon(Icons.brush_outlined, size: 15, color: AppColors.primary),
+        SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            'Mockup UI M3/M5: data contoh, belum tersambung ke server.',
+            style: TextStyle(
+              fontSize: 10,
+              height: 1.35,
+              color: AppColors.primary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }

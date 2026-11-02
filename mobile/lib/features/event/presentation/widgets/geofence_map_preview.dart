@@ -3,249 +3,417 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_theme.dart';
-import '../../../../core/utils/geo.dart';
 
-/// Peta sementara untuk M5: menggambar titik kegiatan, lingkaran radius, dan
-/// titik lain (mis. titik presensi anggota) tanpa Google Maps.
+/// Mockup peta untuk M5 (pilih titik & radius geofence).
 ///
-/// Ini pengganti sementara `google_maps_flutter` karena build peta butuh API
-/// key dan billing. Setelah key tersedia, ganti isi widget ini dengan
-/// `GoogleMap` tanpa mengubah halaman pemakainya.
+/// Peta digambar manual dengan [CustomPaint] supaya mockup bisa jalan tanpa
+/// Google Maps API key. Tidak ada gestur, tidak ada kamera, dan tidak ada
+/// permintaan jaringan: semua bentuknya tetap.
+///
+/// Saat M5 dikerjakan sungguhan, ganti [Positioned.fill] di [_MapCanvas]
+/// dengan widget `GoogleMap` dan biarkan overlay di atasnya apa adanya.
 class GeofenceMapPreview extends StatelessWidget {
   const GeofenceMapPreview({
     super.key,
-    required this.center,
-    required this.radiusMeters,
-    this.markers = const <GeoPoint>[],
-    this.currentLocation,
-    this.onTapPoint,
-    this.height = 220,
+    required this.radiusMeter,
+    this.centerLabel = 'Student Center',
+    this.showTooltip = true,
+    this.showRadiusLabel = true,
   });
 
-  /// Titik kegiatan (pin dan pusat lingkaran radius).
-  final GeoPoint center;
+  /// Radius lingkaran geofence dalam meter.
+  final int radiusMeter;
 
-  /// Radius geofence dalam meter.
-  final double radiusMeters;
+  /// Nama titik tengah yang tampil di bawah pin.
+  final String centerLabel;
 
-  /// Titik tambahan, mis. sebaran titik presensi anggota (M5.2).
-  final List<GeoPoint> markers;
+  /// Kartu petunjuk "Geser peta untuk tentukan titik tengah".
+  final bool showTooltip;
 
-  /// Posisi pengguna saat ini, bila ada.
-  final GeoPoint? currentLocation;
-
-  /// Dipanggil saat peta diketuk; koordinat hasil ketukan dikembalikan.
-  final ValueChanged<GeoPoint>? onTapPoint;
-
-  final double height;
-
-  /// Radius lingkaran dalam piksel, dihitung dari sisi terpendek.
-  static double radiusPixels(Size size) =>
-      math.min(size.width, size.height) * 0.36;
-
-  /// Mengubah posisi ketukan pada peta menjadi koordinat.
-  static GeoPoint pointAt(
-    Offset localPosition,
-    Size size,
-    GeoPoint center,
-    double radiusMeters,
-  ) {
-    final double metersPerPixel = radiusMeters / radiusPixels(size);
-    final double eastMeters =
-        (localPosition.dx - size.width / 2) * metersPerPixel;
-    final double northMeters =
-        (size.height / 2 - localPosition.dy) * metersPerPixel;
-    return center.offsetBy(eastMeters, northMeters);
-  }
+  /// Label "R ≈ 50 Meter" di atas lingkaran.
+  final bool showRadiusLabel;
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(AppTheme.controlRadius),
-      child: SizedBox(
-        height: height,
-        width: double.infinity,
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            final Size size = Size(constraints.maxWidth, constraints.maxHeight);
-            return GestureDetector(
-              onTapUp: onTapPoint == null
-                  ? null
-                  : (TapUpDetails details) => onTapPoint!(
-                      pointAt(
-                        details.localPosition,
-                        size,
-                        center,
-                        radiusMeters,
-                      ),
-                    ),
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final Size size = Size(constraints.maxWidth, constraints.maxHeight);
+        final Offset center = Offset(size.width / 2, size.height * 0.44);
+        final double radius = radiusMeter * _pixelsPerMeter;
+
+        return Stack(
+          clipBehavior: Clip.hardEdge,
+          children: <Widget>[
+            Positioned.fill(
               child: CustomPaint(
-                size: size,
-                painter: _GeofenceMapPainter(
+                painter: _MapPainter(
                   center: center,
-                  radiusMeters: radiusMeters,
-                  markers: markers,
-                  currentLocation: currentLocation,
+                  radius: radius,
+                  centerLabel: centerLabel,
                 ),
-                child: onTapPoint == null
-                    ? null
-                    : const Align(
-                        alignment: Alignment.bottomLeft,
-                        child: _MapHint(),
-                      ),
               ),
-            );
-          },
-        ),
-      ),
+            ),
+            if (showRadiusLabel)
+              Positioned(
+                left: center.dx - 62,
+                top: center.dy - radius - 38,
+                child: _RadiusLabel(radiusMeter: radiusMeter),
+              ),
+            if (showTooltip)
+              Positioned(
+                left: 12,
+                top: center.dy - radius - 92,
+                child: const _Tooltip(),
+              ),
+            const Positioned(right: 12, top: 12, child: _ZoomControls()),
+          ],
+        );
+      },
     );
   }
 }
 
-class _MapHint extends StatelessWidget {
-  const _MapHint();
+/// Skala peta: 50 meter kira-kira 78 piksel, sama dengan desain.
+const double _pixelsPerMeter = 1.56;
+
+/// Label "R ≈ 50 Meter" berbentuk pil putih.
+class _RadiusLabel extends StatelessWidget {
+  const _RadiusLabel({required this.radiusMeter});
+
+  final int radiusMeter;
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(8),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.surface.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.border),
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(100),
+      boxShadow: const <BoxShadow>[
+        BoxShadow(color: Color(0x1A0F172A), blurRadius: 8, offset: Offset(0, 2)),
+      ],
+    ),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          const Icon(Icons.adjust, size: 13, color: AppColors.primary),
+          const SizedBox(width: 5),
+          Text(
+            'R ≈ $radiusMeter Meter',
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: AppColors.primary,
+            ),
+          ),
+        ],
       ),
-      child: const Text(
-        'Peta sementara • ketuk untuk memindah pin',
-        style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
-      ),
-    );
-  }
+    ),
+  );
 }
 
-class _GeofenceMapPainter extends CustomPainter {
-  const _GeofenceMapPainter({
-    required this.center,
-    required this.radiusMeters,
-    required this.markers,
-    required this.currentLocation,
+/// Kartu petunjuk gelap di atas peta.
+class _Tooltip extends StatelessWidget {
+  const _Tooltip();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    constraints: const BoxConstraints(maxWidth: 210),
+    decoration: BoxDecoration(
+      color: const Color(0xFF1F2937),
+      borderRadius: BorderRadius.circular(10),
+    ),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+    child: const Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Icon(Icons.touch_app_outlined, size: 15, color: Colors.white),
+        SizedBox(width: 7),
+        Flexible(
+          child: Text(
+            'Geser peta untuk tentukan titik tengah',
+            style: TextStyle(
+              fontSize: 11,
+              height: 1.3,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Tombol bulat di kanan bawah peta (target, +, −).
+class _ZoomControls extends StatelessWidget {
+  const _ZoomControls();
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: <Widget>[
+      _RoundButton(
+        icon: Icons.gps_fixed,
+        background: AppColors.primary,
+        foreground: AppColors.surface,
+      ),
+      const SizedBox(height: 10),
+      _RoundButton(icon: Icons.add, background: AppColors.surface),
+      const SizedBox(height: 8),
+      _RoundButton(icon: Icons.remove, background: AppColors.surface),
+    ],
+  );
+}
+
+class _RoundButton extends StatelessWidget {
+  const _RoundButton({
+    required this.icon,
+    required this.background,
+    this.foreground = AppColors.textPrimary,
   });
 
-  final GeoPoint center;
-  final double radiusMeters;
-  final List<GeoPoint> markers;
-  final GeoPoint? currentLocation;
+  final IconData icon;
+  final Color background;
+  final Color foreground;
 
-  static const double _metersPerDegreeLat = 111320;
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 34,
+    height: 34,
+    decoration: BoxDecoration(
+      color: background,
+      shape: BoxShape.circle,
+      boxShadow: const <BoxShadow>[
+        BoxShadow(color: Color(0x1A0F172A), blurRadius: 6, offset: Offset(0, 2)),
+      ],
+    ),
+    child: Icon(icon, size: 18, color: foreground),
+  );
+}
+
+/// Menggambar jalan, blok gedung, pohon, lingkaran radius, dan pin tengah.
+class _MapPainter extends CustomPainter {
+  const _MapPainter({
+    required this.center,
+    required this.radius,
+    required this.centerLabel,
+  });
+
+  final Offset center;
+  final double radius;
+  final String centerLabel;
+
+  /// Titik pohon sebagai pecahan dari ukuran peta.
+  static const List<Offset> _trees = <Offset>[
+    Offset(0.14, 0.20),
+    Offset(0.30, 0.13),
+    Offset(0.62, 0.16),
+    Offset(0.80, 0.24),
+    Offset(0.24, 0.40),
+    Offset(0.70, 0.38),
+    Offset(0.16, 0.58),
+    Offset(0.44, 0.72),
+    Offset(0.82, 0.62),
+    Offset(0.36, 0.86),
+  ];
+
+  /// Blok gedung: kiri, atas, lebar, tinggi (pecahan ukuran peta).
+  static const List<Rect> _buildings = <Rect>[
+    Rect.fromLTWH(0.08, 0.05, 0.22, 0.10),
+    Rect.fromLTWH(0.58, 0.05, 0.26, 0.09),
+    Rect.fromLTWH(0.44, 0.22, 0.18, 0.08),
+    Rect.fromLTWH(0.10, 0.66, 0.20, 0.12),
+    Rect.fromLTWH(0.62, 0.74, 0.24, 0.12),
+  ];
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Offset origin = Offset(size.width / 2, size.height / 2);
-    final double radiusPx = GeofenceMapPreview.radiusPixels(size);
-    final double metersPerPixel = radiusMeters / radiusPx;
-
-    _paintBackground(canvas, size);
-    _paintGrid(canvas, size, radiusPx);
-
-    // Lingkaran radius geofence (M5.1).
-    canvas.drawCircle(
-      origin,
-      radiusPx,
-      Paint()..color = AppColors.primaryTint.withValues(alpha: 0.85),
-    );
-    canvas.drawCircle(
-      origin,
-      radiusPx,
-      Paint()
-        ..color = AppColors.primary
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.5,
-    );
-
-    // Titik tambahan, mis. titik presensi anggota (M5.2).
-    for (final GeoPoint marker in markers) {
-      final Offset position = _project(marker, origin, metersPerPixel);
-      if (_inside(position, size)) {
-        _paintDot(canvas, position, AppColors.success);
-      }
-    }
-
-    final GeoPoint? current = currentLocation;
-    if (current != null) {
-      final Offset position = _project(current, origin, metersPerPixel);
-      if (_inside(position, size)) {
-        _paintDot(canvas, position, AppColors.primary);
-      }
-    }
-
-    _paintPin(canvas, origin);
+    _paintGround(canvas, size);
+    _paintRoads(canvas, size);
+    _paintBuildings(canvas, size);
+    _paintTrees(canvas, size);
+    _paintRadius(canvas);
+    _paintCenterPin(canvas);
+    _paintMapLabels(canvas, size);
   }
 
-  void _paintBackground(Canvas canvas, Size size) {
-    canvas.drawRect(Offset.zero & size, Paint()..color = AppColors.background);
+  void _paintGround(Canvas canvas, Size size) {
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()..color = const Color(0xFFF1F4F1),
+    );
   }
 
-  void _paintGrid(Canvas canvas, Size size, double radiusPx) {
-    final Paint paint = Paint()
-      ..color = AppColors.border
+  void _paintRoads(Canvas canvas, Size size) {
+    final Paint road = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 14
+      ..strokeCap = StrokeCap.round;
+
+    final Paint thinRoad = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 7
+      ..strokeCap = StrokeCap.round;
+
+    // Jalan utama horizontal dan vertikal.
+    canvas.drawLine(
+      Offset(0, size.height * 0.32),
+      Offset(size.width, size.height * 0.30),
+      road,
+    );
+    canvas.drawLine(
+      Offset(size.width * 0.40, 0),
+      Offset(size.width * 0.42, size.height),
+      road,
+    );
+    // Jalan sekunder.
+    canvas.drawLine(
+      Offset(0, size.height * 0.62),
+      Offset(size.width, size.height * 0.60),
+      thinRoad,
+    );
+    canvas.drawLine(
+      Offset(size.width * 0.78, 0),
+      Offset(size.width * 0.76, size.height * 0.55),
+      thinRoad,
+    );
+  }
+
+  void _paintBuildings(Canvas canvas, Size size) {
+    final Paint fill = Paint()..color = const Color(0xFFE4E8E4);
+    final Paint border = Paint()
+      ..color = const Color(0xFFD6DBD6)
+      ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
-    const double step = 24;
-    for (double x = 0; x <= size.width; x += step) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+
+    for (final Rect unit in _buildings) {
+      final Rect rect = Rect.fromLTWH(
+        unit.left * size.width,
+        unit.top * size.height,
+        unit.width * size.width,
+        unit.height * size.height,
+      );
+      final RRect rounded = RRect.fromRectAndRadius(
+        rect,
+        const Radius.circular(4),
+      );
+      canvas.drawRRect(rounded, fill);
+      canvas.drawRRect(rounded, border);
     }
-    for (double y = 0; y <= size.height; y += step) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+  }
+
+  void _paintTrees(Canvas canvas, Size size) {
+    final Paint canopy = Paint()..color = const Color(0xFFBFE3C6);
+    final Paint trunk = Paint()..color = const Color(0xFF9FCFA9);
+
+    for (final Offset unit in _trees) {
+      final Offset at = Offset(unit.dx * size.width, unit.dy * size.height);
+      canvas.drawCircle(at, 7, canopy);
+      canvas.drawCircle(at.translate(-2, 2), 4, trunk);
     }
   }
 
-  Offset _project(GeoPoint point, Offset origin, double metersPerPixel) {
-    final double eastMeters =
-        (point.longitude - center.longitude) *
-        _metersPerDegreeLat *
-        math.cos(center.latitude * math.pi / 180);
-    final double northMeters =
-        (point.latitude - center.latitude) * _metersPerDegreeLat;
-    return Offset(
-      origin.dx + eastMeters / metersPerPixel,
-      origin.dy - northMeters / metersPerPixel,
-    );
-  }
-
-  bool _inside(Offset position, Size size) =>
-      position.dx >= 0 &&
-      position.dy >= 0 &&
-      position.dx <= size.width &&
-      position.dy <= size.height;
-
-  void _paintDot(Canvas canvas, Offset position, Color color) {
-    canvas.drawCircle(position, 7, Paint()..color = AppColors.surface);
-    canvas.drawCircle(position, 5, Paint()..color = color);
-  }
-
-  void _paintPin(Canvas canvas, Offset position) {
+  void _paintRadius(Canvas canvas) {
+    // Isian biru transparan di dalam lingkaran.
     canvas.drawCircle(
-      position,
-      9,
-      Paint()
-        ..color = AppColors.primary
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 3,
+      center,
+      radius,
+      Paint()..color = AppColors.primary.withValues(alpha: 0.07),
     );
+    // Garis putus-putus.
+    const int dashes = 44;
+    final double step = (2 * math.pi) / dashes;
+    final Paint stroke = Paint()
+      ..color = AppColors.primary
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    for (int i = 0; i < dashes; i++) {
+      if (i.isEven) {
+        canvas.drawArc(
+          Rect.fromCircle(center: center, radius: radius),
+          i * step,
+          step,
+          false,
+          stroke,
+        );
+      }
+    }
+  }
+
+  void _paintCenterPin(Canvas canvas) {
+    // Bayangan pin.
+    canvas.drawCircle(
+      center.translate(0, 3),
+      13,
+      Paint()..color = const Color(0x22000000),
+    );
+    // Badan pin.
+    canvas.drawCircle(center, 12, Paint()..color = AppColors.primary);
+    canvas.drawCircle(center, 10, Paint()..color = AppColors.surface);
+    canvas.drawCircle(center, 5, Paint()..color = AppColors.primary);
+
+    // Pil putih berisi nama titik di atas pin.
+    final TextPainter label = TextPainter(
+      text: TextSpan(
+        text: centerLabel,
+        style: const TextStyle(
+          fontSize: 9,
+          fontWeight: FontWeight.w700,
+          color: AppColors.textPrimary,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    final Rect box = Rect.fromCenter(
+      center: center.translate(0, -28),
+      width: label.width + 14,
+      height: 19,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(box, const Radius.circular(6)),
+      Paint()..color = AppColors.surface,
+    );
+    label.paint(
+      canvas,
+      Offset(box.center.dx - label.width / 2, box.center.dy - label.height / 2),
+    );
+  }
+
+  void _paintMapLabels(Canvas canvas, Size size) {
+    _label(canvas, 'Rektorat', Offset(size.width * 0.19, size.height * 0.34));
+    _label(canvas, 'GSO', Offset(size.width * 0.71, size.height * 0.30));
+    _label(
+      canvas,
+      'Open Library',
+      Offset(size.width * 0.30, size.height * 0.80),
+    );
+    _label(
+      canvas,
+      'Kawasan Kampus Telkom Univ',
+      Offset(size.width * 0.30, size.height * 0.93),
+      color: AppColors.primary,
+    );
+  }
+
+  void _label(
+    Canvas canvas,
+    String text,
+    Offset at, {
+    Color color = AppColors.textSecondary,
+  }) {
+    final TextPainter painter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(fontSize: 9, color: color, fontWeight: FontWeight.w600),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    painter.paint(canvas, at);
   }
 
   @override
-  bool shouldRepaint(covariant _GeofenceMapPainter oldDelegate) =>
+  bool shouldRepaint(_MapPainter oldDelegate) =>
+      oldDelegate.radius != radius ||
       oldDelegate.center != center ||
-      oldDelegate.radiusMeters != radiusMeters ||
-      oldDelegate.currentLocation != currentLocation ||
-      !_sameMarkers(oldDelegate.markers, markers);
-
-  bool _sameMarkers(List<GeoPoint> a, List<GeoPoint> b) {
-    if (a.length != b.length) return false;
-    for (int i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
-  }
+      oldDelegate.centerLabel != centerLabel;
 }

@@ -1,464 +1,532 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/utils/geo.dart';
-import '../../domain/entities/event.dart';
-import '../../domain/repositories/event_repository.dart';
-import '../bloc/event_address_bloc.dart';
-import '../bloc/event_address_event.dart';
-import '../bloc/event_address_state.dart';
-import '../event_formatters.dart';
-import '../widgets/geofence_map_preview.dart';
+import '../mock/mock_kegiatan.dart';
+import 'geofence_picker_page.dart';
 
-/// Form tambah/ubah kegiatan dengan pin peta, alamat otomatis, dan radius
-/// (M3.1, M3.2, M3.5, M3.6).
+/// Mockup M3 — "Buat Kegiatan Baru".
 ///
-/// Mengembalikan [Event] lewat `Navigator.pop`; penyimpanan ke repositori
-/// dilakukan oleh [EventListBloc] agar hanya ada satu jalur tulis.
-class EventFormPage extends StatefulWidget {
-  const EventFormPage({super.key, required this.repository, this.event});
-
-  final EventRepository repository;
-
-  /// Bila diisi, form menjadi mode ubah.
-  final Event? event;
-
-  @override
-  State<EventFormPage> createState() => _EventFormPageState();
-}
-
-class _EventFormPageState extends State<EventFormPage> {
-  /// Daftar kelompok sementara. Diganti data M2 (Khalifa) setelah siap.
-  static const List<MapEntry<String, String>> _groups =
-      <MapEntry<String, String>>[
-        MapEntry<String, String>('1', 'UKM Robotika'),
-        MapEntry<String, String>('2', 'BEM Fakultas'),
-        MapEntry<String, String>('3', 'Panitia PKKMB'),
-      ];
-
-  /// Radius minimum menurut M3.5.
-  static const double _minRadius = 30;
-  static const double _maxRadius = 500;
-
-  late final TextEditingController _title;
-  late final TextEditingController _description;
-  late String _groupId;
-  late DateTime _date;
-  late TimeOfDay _startTime;
-  late TimeOfDay _endTime;
-  late double _radius;
-  late GeoPoint _point;
-  String? _address;
-
-  String? _titleError;
-  String? _timeError;
-  String? _radiusError;
-
-  bool get _isEditing => widget.event != null;
-
-  @override
-  void initState() {
-    super.initState();
-    final Event? existing = widget.event;
-    _title = TextEditingController(text: existing?.title ?? '');
-    _description = TextEditingController(text: existing?.description ?? '');
-    _groupId = existing?.groupId ?? _groups.first.key;
-    final DateTime startAt = existing?.startAt ?? _defaultStart();
-    _date = DateTime(startAt.year, startAt.month, startAt.day);
-    _startTime = TimeOfDay.fromDateTime(startAt);
-    _endTime = TimeOfDay.fromDateTime(
-      existing?.endAt ?? startAt.add(const Duration(hours: 2)),
-    );
-    _radius = (existing?.location.radiusMeters ?? 50).clamp(
-      _minRadius,
-      _maxRadius,
-    );
-    _point = existing?.location.point ?? const GeoPoint(-6.9732, 107.6304);
-    _address = existing?.location.address;
-  }
-
-  static DateTime _defaultStart() {
-    final DateTime now = DateTime.now();
-    return DateTime(now.year, now.month, now.day, 9);
-  }
-
-  @override
-  void dispose() {
-    _title.dispose();
-    _description.dispose();
-    super.dispose();
-  }
+/// Mengikuti desain "Buat Kegiatan": kartu Informasi Kegiatan, kartu Jadwal &
+/// Waktu Presensi, lalu tombol Simpan & Jadwalkan. Semua isian mati
+/// (readOnly) dan nilainya diambil dari [mock_kegiatan.dart]; tidak ada
+/// penyimpanan, validasi, atau panggilan jaringan.
+///
+/// Kartu "Titik Lokasi & Radius" ditambahkan sebagai jalan masuk ke mockup M5
+/// ([GeofencePickerPage]), sesuai lingkup M3 "pilih lokasi di peta".
+class EventFormPage extends StatelessWidget {
+  const EventFormPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<EventAddressBloc>(
-      create: (_) => EventAddressBloc(widget.repository),
-      child: Builder(
-        builder: (BuildContext context) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text(_isEditing ? 'Ubah Kegiatan' : 'Buat Kegiatan Baru'),
-            ),
-            body: BlocListener<EventAddressBloc, EventAddressState>(
-              listener: (BuildContext context, EventAddressState state) {
-                if (state.status == EventAddressStatus.success) {
-                  setState(() => _address = state.address);
-                }
-              },
-              child: ListView(
-                padding: const EdgeInsets.all(AppTheme.gap),
-                children: <Widget>[
-                  _Section(
-                    title: 'Informasi Kegiatan',
-                    child: Column(
-                      children: <Widget>[
-                        _GroupDropdown(
-                          value: _groupId,
-                          groups: _groups,
-                          onChanged: (String value) =>
-                              setState(() => _groupId = value),
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: _title,
-                          textInputAction: TextInputAction.next,
-                          decoration: InputDecoration(
-                            labelText: 'Judul Kegiatan',
-                            errorText: _titleError,
-                            border: const OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: _description,
-                          minLines: 2,
-                          maxLines: 4,
-                          decoration: const InputDecoration(
-                            labelText: 'Deskripsi',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _Section(
-                    title: 'Waktu Kegiatan',
-                    child: Column(
-                      children: <Widget>[
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: const Icon(Icons.event_outlined),
-                          title: const Text('Tanggal'),
-                          subtitle: Text(formatDate(_date)),
-                          onTap: _pickDate,
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: _TimeField(
-                                label: 'Jam Mulai',
-                                value: _startTime,
-                                onTap: () => _pickTime(isStart: true),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _TimeField(
-                                label: 'Jam Selesai',
-                                value: _endTime,
-                                onTap: () => _pickTime(isStart: false),
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (_timeError != null) ...<Widget>[
-                          const SizedBox(height: 8),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              _timeError!,
-                              style: const TextStyle(
-                                color: AppColors.error,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _Section(
-                    title: 'Titik Lokasi & Radius',
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        GeofenceMapPreview(
-                          center: _point,
-                          radiusMeters: _radius,
-                          height: 200,
-                          onTapPoint: _onMapTap,
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: <Widget>[
-                            const Icon(
-                              Icons.place_outlined,
-                              size: 18,
-                              color: AppColors.textSecondary,
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                _address ??
-                                    '${_point.latitude.toStringAsFixed(5)}, '
-                                        '${_point.longitude.toStringAsFixed(5)}',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ),
-                            BlocBuilder<EventAddressBloc, EventAddressState>(
-                              builder: (_, EventAddressState state) =>
-                                  state.isLoading
-                                  ? const SizedBox(
-                                      width: 14,
-                                      height: 14,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : const SizedBox.shrink(),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Radius Presensi: ${_radius.round()} Meter',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        Slider(
-                          value: _radius,
-                          min: _minRadius,
-                          max: _maxRadius,
-                          divisions: 47,
-                          label: '${_radius.round()} Meter',
-                          onChanged: (double value) =>
-                              setState(() => _radius = value),
-                        ),
-                        Text(
-                          _radiusError ?? 'Minimal 30 meter untuk akurasi GPS dalam ruangan.',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: _radiusError == null
-                                ? AppColors.textSecondary
-                                : AppColors.error,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 96),
-                ],
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        toolbarHeight: 66,
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).maybePop(),
+          icon: const Icon(Icons.arrow_back),
+        ),
+        title: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              'Buat Kegiatan Baru',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
               ),
             ),
-            bottomNavigationBar: SafeArea(
-              minimum: const EdgeInsets.all(AppTheme.gap),
-              child: SizedBox(
-                height: AppTheme.minTouchTarget,
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: _save,
-                  child: const Text('Simpan & Jadwalkan Kegiatan'),
+            SizedBox(height: 2),
+            Text(
+              'Kelola Jadwal & Geofence',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+        children: <Widget>[
+          const _SectionCard(
+            icon: Icons.info_outline,
+            title: 'Informasi Kegiatan',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                _LabelRow(label: 'Pilih Kelompok / Organisasi', trailing: _AdminBadge()),
+                SizedBox(height: 8),
+                _DropdownField(value: 'UKM CCI'),
+                SizedBox(height: 8),
+                _HelperNote(
+                  text: 'Hanya kelompok di mana Anda berstatus Pengurus',
                 ),
-              ),
+                SizedBox(height: 16),
+                _LabelText('Judul Kegiatan'),
+                SizedBox(height: 8),
+                _FilledField(value: mockJudulKegiatan),
+                SizedBox(height: 16),
+                _LabelRow(label: 'Deskripsi & Agenda', muted: 'Optional'),
+                SizedBox(height: 8),
+                _FilledField(value: mockDeskripsiKegiatan, lines: 5),
+              ],
             ),
-          );
-        },
+          ),
+          const SizedBox(height: 16),
+          const _SectionCard(
+            icon: Icons.schedule,
+            title: 'Jadwal & Waktu Presensi',
+            subtitle: 'Sinkronisasi server kampus (PRD M3.1)',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                _SyncNote(),
+                SizedBox(height: 16),
+                _LabelText('Tanggal Kegiatan'),
+                SizedBox(height: 8),
+                _DateField(value: mockTanggalKegiatan),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          const _SectionCard(
+            icon: Icons.place_outlined,
+            title: 'Titik Lokasi & Radius',
+            subtitle: 'Peta geofence (PRD M5)',
+            child: _LocationSummary(),
+          ),
+          const SizedBox(height: 20),
+          const _SubmitButton(),
+          const SizedBox(height: 14),
+          const _FooterNote(),
+        ],
       ),
     );
-  }
-
-  void _onMapTap(GeoPoint point) {
-    setState(() {
-      _point = point;
-      _address = null;
-    });
-    context.read<EventAddressBloc>().add(EventAddressLookupRequested(_point));
-  }
-
-  Future<void> _pickDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _date,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
-    );
-    if (picked == null || !mounted) return;
-    setState(() => _date = picked);
-  }
-
-  Future<void> _pickTime({required bool isStart}) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: isStart ? _startTime : _endTime,
-    );
-    if (picked == null || !mounted) return;
-    setState(() {
-      if (isStart) {
-        _startTime = picked;
-      } else {
-        _endTime = picked;
-      }
-    });
-  }
-
-  DateTime _combine(DateTime date, TimeOfDay time) =>
-      DateTime(date.year, date.month, date.day, time.hour, time.minute);
-
-  void _save() {
-    final DateTime startAt = _combine(_date, _startTime);
-    final DateTime endAt = _combine(_date, _endTime);
-
-    final String? titleError = _title.text.trim().isEmpty
-        ? 'Judul kegiatan wajib diisi'
-        : null;
-    final String? timeError = endAt.isAfter(startAt)
-        ? null
-        : 'Jam selesai harus setelah jam mulai';
-    final String? radiusError = _radius < _minRadius
-        ? 'Radius minimal 30 meter'
-        : null;
-
-    setState(() {
-      _titleError = titleError;
-      _timeError = timeError;
-      _radiusError = radiusError;
-    });
-
-    if (titleError != null || timeError != null || radiusError != null) return;
-
-    final Event result = Event(
-      id: widget.event?.id ?? '',
-      groupId: _groupId,
-      title: _title.text.trim(),
-      description: _description.text.trim(),
-      location: EventLocation(
-        point: _point,
-        radiusMeters: _radius,
-        address: _address,
-      ),
-      startAt: startAt,
-      endAt: endAt,
-      status: EventStatus.published,
-      createdBy: widget.event?.createdBy,
-      createdAt: widget.event?.createdAt,
-    );
-
-    Navigator.of(context).pop(result);
   }
 }
 
-class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.child});
+/// Kartu berjudul dengan ikon kecil di kiri.
+class _SectionCard extends StatelessWidget {
+  const _SectionCard({
+    required this.icon,
+    required this.title,
+    required this.child,
+    this.subtitle,
+  });
 
+  final IconData icon;
   final String title;
+  final String? subtitle;
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    return Material(
+  Widget build(BuildContext context) => Container(
+    decoration: BoxDecoration(
       color: AppColors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-        side: const BorderSide(color: AppColors.border),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppTheme.gap),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+      border: Border.all(color: AppColors.border),
+    ),
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Row(
           children: <Widget>[
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
+            Icon(icon, size: 18, color: AppColors.primary),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  if (subtitle != null)
+                    Text(
+                      subtitle!,
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        child,
+      ],
+    ),
+  );
+}
+
+/// Label isian dengan tanda wajib dan/atau teks kanan.
+class _LabelRow extends StatelessWidget {
+  const _LabelRow({required this.label, this.trailing, this.muted});
+
+  final String label;
+  final Widget? trailing;
+  final String? muted;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: <Widget>[
+      Expanded(
+        child: Text.rich(
+          TextSpan(
+            text: label,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+            children: <InlineSpan>[
+              const TextSpan(
+                text: ' *',
+                style: TextStyle(color: AppColors.error),
+              ),
+            ],
+          ),
+        ),
+      ),
+      if (muted != null)
+        Text(
+          muted!,
+          style: const TextStyle(
+            fontSize: 11,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      ?trailing,
+    ],
+  );
+}
+
+/// Label isian tanpa tanda wajib (mis. teks di dalam daftar).
+class _LabelText extends StatelessWidget {
+  const _LabelText(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Text.rich(
+    TextSpan(
+      text: text,
+      style: const TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
+      ),
+      children: const <InlineSpan>[
+        TextSpan(text: ' *', style: TextStyle(color: AppColors.error)),
+      ],
+    ),
+  );
+}
+
+/// Pil biru "ADMIN MODE".
+class _AdminBadge extends StatelessWidget {
+  const _AdminBadge();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+    decoration: BoxDecoration(
+      color: AppColors.primaryTint,
+      borderRadius: BorderRadius.circular(100),
+    ),
+    child: const Text(
+      'ADMIN MODE',
+      style: TextStyle(
+        fontSize: 9,
+        letterSpacing: 0.5,
+        fontWeight: FontWeight.w700,
+        color: AppColors.primary,
+      ),
+    ),
+  );
+}
+
+/// Catatan kecil berikon centang hijau.
+class _HelperNote extends StatelessWidget {
+  const _HelperNote({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: <Widget>[
+      const Icon(Icons.check_circle, size: 13, color: AppColors.success),
+      const SizedBox(width: 6),
+      Expanded(
+        child: Text(
+          text,
+          style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+        ),
+      ),
+    ],
+  );
+}
+
+/// Isian yang tampak seperti dropdown kelompok.
+class _DropdownField extends StatelessWidget {
+  const _DropdownField({required this.value});
+
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    height: 48,
+    decoration: BoxDecoration(
+      color: AppColors.background,
+      borderRadius: BorderRadius.circular(AppTheme.controlRadius),
+      border: Border.all(color: AppColors.border),
+    ),
+    padding: const EdgeInsets.symmetric(horizontal: 12),
+    child: Row(
+      children: <Widget>[
+        const Icon(
+          Icons.account_balance_outlined,
+          size: 17,
+          color: AppColors.textSecondary,
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+        const Icon(
+          Icons.keyboard_arrow_down,
+          size: 20,
+          color: AppColors.textSecondary,
+        ),
+      ],
+    ),
+  );
+}
+
+/// Isian teks mati berisi nilai contoh.
+class _FilledField extends StatelessWidget {
+  const _FilledField({required this.value, this.lines = 1});
+
+  final String value;
+  final int lines;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    decoration: BoxDecoration(
+      color: AppColors.background,
+      borderRadius: BorderRadius.circular(AppTheme.controlRadius),
+      border: Border.all(color: AppColors.border),
+    ),
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+    child: Text(
+      value,
+      style: const TextStyle(
+        fontSize: 13,
+        height: 1.45,
+        color: AppColors.textPrimary,
+      ),
+    ),
+  );
+}
+
+/// Isian tanggal dengan ikon kalender di kanan.
+class _DateField extends StatelessWidget {
+  const _DateField({required this.value});
+
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    height: 48,
+    decoration: BoxDecoration(
+      color: AppColors.background,
+      borderRadius: BorderRadius.circular(AppTheme.controlRadius),
+      border: Border.all(color: AppColors.border),
+    ),
+    padding: const EdgeInsets.symmetric(horizontal: 12),
+    child: Row(
+      children: <Widget>[
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+        const Icon(
+          Icons.calendar_month_outlined,
+          size: 18,
+          color: AppColors.primary,
+        ),
+      ],
+    ),
+  );
+}
+
+/// Kotak biru berisi keterangan sinkronisasi waktu.
+class _SyncNote extends StatelessWidget {
+  const _SyncNote();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: double.infinity,
+    decoration: BoxDecoration(
+      color: AppColors.primaryTint,
+      borderRadius: BorderRadius.circular(AppTheme.controlRadius),
+    ),
+    padding: const EdgeInsets.all(12),
+    child: const Row(
+      children: <Widget>[
+        Icon(Icons.wifi, size: 16, color: AppColors.primary),
+        SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            'Waktu sinkronisasi otomatis'
+            ' dengan server kampus (WIB)',
+            style: TextStyle(
+              fontSize: 11,
+              height: 1.35,
+              color: AppColors.primary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Ringkasan lokasi dan radius, dengan jalan masuk ke mockup M5.
+class _LocationSummary extends StatelessWidget {
+  const _LocationSummary();
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: <Widget>[
+      Row(
+        children: <Widget>[
+          const Icon(Icons.place, size: 16, color: AppColors.primary),
+          const SizedBox(width: 6),
+          const Expanded(
+            child: Text(
+              mockAlamatGeocoding,
+              style: TextStyle(
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: 12),
-            child,
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _GroupDropdown extends StatelessWidget {
-  const _GroupDropdown({
-    required this.value,
-    required this.groups,
-    required this.onChanged,
-  });
-
-  final String value;
-  final List<MapEntry<String, String>> groups;
-  final ValueChanged<String> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
-      initialValue: value,
-      decoration: const InputDecoration(
-        labelText: 'Kelompok',
-        border: OutlineInputBorder(),
-      ),
-      items: groups
-          .map(
-            (MapEntry<String, String> group) => DropdownMenuItem<String>(
-              value: group.key,
-              child: Text(group.value),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppColors.primaryTint,
+              borderRadius: BorderRadius.circular(100),
             ),
-          )
-          .toList(),
-      onChanged: (String? selected) {
-        if (selected != null) onChanged(selected);
-      },
-    );
-  }
+            child: Text(
+              '$mockRadiusMeter m',
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 12),
+      SizedBox(
+        width: double.infinity,
+        child: OutlinedButton.icon(
+          onPressed: () => Navigator.of(context).push<void>(
+            MaterialPageRoute<void>(
+              builder: (_) => const GeofencePickerPage(),
+            ),
+          ),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.primary,
+            side: const BorderSide(color: AppColors.primary),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.controlRadius),
+            ),
+            minimumSize: const Size(0, AppTheme.minTouchTarget),
+          ),
+          icon: const Icon(Icons.map_outlined, size: 17),
+          label: const Text(
+            'Pilih Titik & Radius di Peta',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+          ),
+        ),
+      ),
+    ],
+  );
 }
 
-class _TimeField extends StatelessWidget {
-  const _TimeField({
-    required this.label,
-    required this.value,
-    required this.onTap,
-  });
-
-  final String label;
-  final TimeOfDay value;
-  final VoidCallback onTap;
+/// Tombol utama "Simpan & Jadwalkan Kegiatan".
+class _SubmitButton extends StatelessWidget {
+  const _SubmitButton();
 
   @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppTheme.controlRadius),
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
+  Widget build(BuildContext context) => SizedBox(
+    width: double.infinity,
+    height: 50,
+    child: FilledButton.icon(
+      onPressed: () => Navigator.of(context).maybePop(),
+      style: FilledButton.styleFrom(
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.controlRadius),
         ),
-        child: Text(formatTime(DateTime(2000, 1, 1, value.hour, value.minute))),
       ),
-    );
-  }
+      icon: const Icon(Icons.event_available_outlined, size: 19),
+      label: const Text(
+        'Simpan & Jadwalkan Kegiatan',
+        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+      ),
+    ),
+  );
+}
+
+/// Catatan kaki di bawah tombol simpan.
+class _FooterNote extends StatelessWidget {
+  const _FooterNote();
+
+  @override
+  Widget build(BuildContext context) => const Row(
+    children: <Widget>[
+      Icon(Icons.info_outline, size: 13, color: AppColors.primary),
+      SizedBox(width: 6),
+      Expanded(
+        child: Text(
+          'Otomatis tersinkronisasi di Beranda anggota UKM CCI',
+          style: TextStyle(fontSize: 10, color: AppColors.textSecondary),
+        ),
+      ),
+    ],
+  );
 }
