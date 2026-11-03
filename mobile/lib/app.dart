@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'features/home/presentation/pages/main_page.dart';
+import 'features/auth/presentation/pages/login_page.dart';
 import 'features/splash/presentation/pages/splash_page.dart';
 import 'core/theme/app_theme.dart';
 
@@ -22,10 +22,7 @@ class AbsenKuyApp extends StatelessWidget {
         value: SystemUiOverlayStyle.dark,
         child: child!,
       ),
-      home: SplashPage(
-        // Sementara langsung ke halaman utama; nanti lewat Login/cek sesi (M1, S4).
-        nextPageBuilder: (_) => const MainPage(),
-      ),
+      home: SplashPage(nextPageBuilder: (_) => const LoginPage()),
     );
   }
 }
