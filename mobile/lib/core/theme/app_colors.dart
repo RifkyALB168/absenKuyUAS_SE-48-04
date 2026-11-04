@@ -36,4 +36,8 @@ class AppColors {
 
   /// Di luar radius atau mock GPS.
   static const Color error = Color(0xFFF43F5E);
+
+  static const Color errorText = Color(0xFFBE123C);
+  static const Color errorTint = Color(0xFFFFF1F2);
+  static const Color errorBorder = Color(0xFFFECDD3);
 }
