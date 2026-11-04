@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../widgets/presensi_berhasil_dialog.dart';
+import '../widgets/presensi_di_luar_radius_dialog.dart';
+import '../widgets/presensi_fake_gps_dialog.dart';
 
 /// Pratinjau UI M4 dengan data contoh; belum mengakses kamera, GPS, atau API.
 class PresensiSelfiePage extends StatelessWidget {
@@ -301,6 +303,17 @@ class _ValidationItem extends StatelessWidget {
 class _PhotoControls extends StatelessWidget {
   const _PhotoControls();
 
+  Future<void> _previewRejection(BuildContext context, Widget dialog) async {
+    final kembaliKeBeranda = await showDialog<bool>(
+      context: context,
+      builder: (_) => dialog,
+    );
+    if (kembaliKeBeranda == true && context.mounted) {
+      // Pratinjau dibuka dari Beranda; tutup halaman selfie untuk kembali.
+      Navigator.of(context).maybePop();
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(16),
@@ -360,6 +373,22 @@ class _PhotoControls extends StatelessWidget {
             builder: (_) => const PresensiBerhasilDialog(),
           ),
           child: const Text('Kirim Presensi Sekarang'),
+        ),
+        const SizedBox(height: 8),
+        TextButton.icon(
+          onPressed: () =>
+              _previewRejection(context, const PresensiDiLuarRadiusDialog()),
+          icon: const Icon(Icons.location_off_outlined, size: 18),
+          label: const Text(
+            'Simulasi di luar radius',
+            textAlign: TextAlign.center,
+          ),
+        ),
+        TextButton.icon(
+          onPressed: () =>
+              _previewRejection(context, const PresensiFakeGpsDialog()),
+          icon: const Icon(Icons.gps_off_rounded, size: 18),
+          label: const Text('Simulasi Fake GPS', textAlign: TextAlign.center),
         ),
       ],
     ),
