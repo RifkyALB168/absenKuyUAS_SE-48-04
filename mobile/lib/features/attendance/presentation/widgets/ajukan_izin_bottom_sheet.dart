@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import 'izin_berhasil_dialog.dart';
 
 class AjukanIzinBottomSheet extends StatefulWidget {
   const AjukanIzinBottomSheet({super.key});
@@ -17,6 +18,17 @@ class _AjukanIzinBottomSheetState extends State<AjukanIzinBottomSheet> {
   void dispose() {
     _reasonController.dispose();
     super.dispose();
+  }
+
+  Future<void> _submit() async {
+    await showDialog<void>(
+      context: context,
+      builder: (_) => const IzinBerhasilDialog(),
+    );
+
+    // Setelah dialog ditutup, tutup juga bottom sheet-nya.
+    if (!mounted) return;
+    Navigator.of(context).pop();
   }
 
   @override
@@ -192,10 +204,7 @@ class _AjukanIzinBottomSheetState extends State<AjukanIzinBottomSheet> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () {
-                  Navigator.pop(context);
-                  // Tambahkan logika pengajuan izin di sini.
-                },
+                onPressed: _submit,
                 icon: const Text(
                   'Kirim Pengajuan Izin',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
