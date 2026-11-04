@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../widgets/presensi_berhasil_dialog.dart';
+import '../widgets/presensi_di_luar_radius_dialog.dart';
+import '../widgets/presensi_fake_gps_dialog.dart';
 
 /// Pratinjau UI M4 dengan data contoh; belum mengakses kamera, GPS, atau API.
 class PresensiSelfiePage extends StatelessWidget {
@@ -33,7 +35,7 @@ class PresensiSelfiePage extends StatelessWidget {
               builder: (context) => AlertDialog(
                 title: const Text('Panduan foto selfie'),
                 content: const Text(
-                  'Posisikan wajah di dalam oval dan pastikan pencahayaan cukup.',
+                  'Posisikan wajah di tengah kamera dan pastikan pencahayaan cukup.',
                 ),
                 actions: [
                   TextButton(
@@ -53,36 +55,13 @@ class PresensiSelfiePage extends StatelessWidget {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
-              child: Column(
+              child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 12,
                 children: [
-                  Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEEF2FF),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text(
-                        'Rapat Pleno & Evaluasi Mingguan · UKM CCI',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: _blue,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const _CameraPreview(),
-                  const SizedBox(height: 12),
-                  const _ValidationCard(),
-                  const SizedBox(height: 12),
-                  const _PhotoControls(),
+                  _CameraPreview(),
+                  _ValidationCard(),
+                  _PhotoControls(),
                 ],
               ),
             ),
@@ -97,119 +76,33 @@ class _CameraPreview extends StatelessWidget {
   const _CameraPreview();
 
   @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: Column(
-        children: [
-          AspectRatio(
-            aspectRatio: 1,
-            child: ColoredBox(
-              color: const Color(0xFF25313D),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  FractionallySizedBox(
-                    widthFactor: 0.67,
-                    heightFactor: 0.72,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(200),
-                        border: Border.all(color: _guide, width: 1.5),
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.person_outline_rounded,
-                          size: 88,
-                          color: Color(0xFFAAB9C4),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const Positioned(
-                    top: 12,
-                    left: 12,
-                    right: 12,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: Color(0xFF17212D),
-                        borderRadius: BorderRadius.all(Radius.circular(16)),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(8),
-                        child: Text(
-                          'Posisikan wajah Anda tepat di dalam oval',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white, fontSize: 11),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const ColoredBox(
+  Widget build(BuildContext context) => Semantics(
+    label: 'Pratinjau kamera',
+    child: AspectRatio(
+      aspectRatio: 1,
+      child: Container(
+        alignment: Alignment.topCenter,
+        padding: const EdgeInsets.all(12),
+        clipBehavior: Clip.antiAlias,
+        decoration: const BoxDecoration(
+          color: Color(0xFF25313D),
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+        ),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(8),
+          decoration: const BoxDecoration(
             color: Color(0xFF17212D),
-            child: Padding(
-              padding: EdgeInsets.all(12),
-              child: Column(
-                children: [
-                  _PhotoDetail(
-                    icon: Icons.location_on_outlined,
-                    text: 'Gedung Tokong Nanas (TULT), Lt. 3',
-                    color: _guide,
-                  ),
-                  SizedBox(height: 5),
-                  _PhotoDetail(
-                    icon: Icons.straighten_rounded,
-                    text: 'Jarak: 18 m / Maks: 50 m · Akurasi GPS: ±4 m',
-                    color: Color(0xFFA5B4FC),
-                  ),
-                  SizedBox(height: 5),
-                  _PhotoDetail(
-                    icon: Icons.schedule_rounded,
-                    text: '24 Okt 2026 · 15:38:22 WIB (Waktu Server)',
-                    color: Color(0xFFFDE68A),
-                  ),
-                ],
-              ),
-            ),
+            borderRadius: BorderRadius.all(Radius.circular(16)),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PhotoDetail extends StatelessWidget {
-  const _PhotoDetail({
-    required this.icon,
-    required this.text,
-    required this.color,
-  });
-
-  final IconData icon;
-  final String text;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Icon(icon, size: 14, color: color),
-      const SizedBox(width: 6),
-      Expanded(
-        child: Text(
-          text,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 10,
-            height: 1.4,
+          child: const Text(
+            'Posisikan wajah Anda di tengah kamera',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white, fontSize: 11),
           ),
         ),
       ),
-    ],
+    ),
   );
 }
 
@@ -231,6 +124,7 @@ class _ValidationCard extends StatelessWidget {
           SizedBox(height: 10),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 8,
             children: [
               Expanded(
                 child: _ValidationItem(
@@ -239,7 +133,6 @@ class _ValidationCard extends StatelessWidget {
                   subtitle: '18 m / 50 m (Valid)',
                 ),
               ),
-              SizedBox(width: 8),
               Expanded(
                 child: _ValidationItem(
                   icon: Icons.schedule_rounded,
@@ -275,9 +168,9 @@ class _ValidationItem extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
     ),
     child: Column(
+      spacing: 4,
       children: [
         Icon(icon, size: 18, color: _green),
-        const SizedBox(height: 4),
         Text(
           title,
           textAlign: TextAlign.center,
@@ -287,7 +180,6 @@ class _ValidationItem extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 4),
         Text(
           subtitle,
           textAlign: TextAlign.center,
@@ -300,6 +192,17 @@ class _ValidationItem extends StatelessWidget {
 
 class _PhotoControls extends StatelessWidget {
   const _PhotoControls();
+
+  Future<void> _previewRejection(BuildContext context, Widget dialog) async {
+    final kembaliKeBeranda = await showDialog<bool>(
+      context: context,
+      builder: (_) => dialog,
+    );
+    if (kembaliKeBeranda == true && context.mounted) {
+      // Pratinjau dibuka dari Beranda; tutup halaman selfie untuk kembali.
+      Navigator.of(context).maybePop();
+    }
+  }
 
   @override
   Widget build(BuildContext context) => Container(
@@ -361,6 +264,22 @@ class _PhotoControls extends StatelessWidget {
           ),
           child: const Text('Kirim Presensi Sekarang'),
         ),
+        const SizedBox(height: 8),
+        TextButton.icon(
+          onPressed: () =>
+              _previewRejection(context, const PresensiDiLuarRadiusDialog()),
+          icon: const Icon(Icons.location_off_outlined, size: 18),
+          label: const Text(
+            'Simulasi di luar radius',
+            textAlign: TextAlign.center,
+          ),
+        ),
+        TextButton.icon(
+          onPressed: () =>
+              _previewRejection(context, const PresensiFakeGpsDialog()),
+          icon: const Icon(Icons.gps_off_rounded, size: 18),
+          label: const Text('Simulasi Fake GPS', textAlign: TextAlign.center),
+        ),
       ],
     ),
   );
@@ -371,7 +290,6 @@ const _ink = Color(0xFF17212D);
 const _muted = Color(0xFF596574);
 const _blue = Color(0xFF365CE6);
 const _green = Color(0xFF24664E);
-const _guide = Color(0xFF8BD5AF);
 final _cardDecoration = BoxDecoration(
   color: Colors.white,
   borderRadius: BorderRadius.circular(14),
