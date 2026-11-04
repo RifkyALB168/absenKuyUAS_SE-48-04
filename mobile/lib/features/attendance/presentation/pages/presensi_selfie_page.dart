@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../widgets/presensi_berhasil_dialog.dart';
 import '../widgets/presensi_di_luar_radius_dialog.dart';
 import '../widgets/presensi_fake_gps_dialog.dart';
+import '../widgets/ajukan_izin_bottom_sheet.dart';
 
 /// Pratinjau UI M4 dengan data contoh; belum mengakses kamera, GPS, atau API.
 class PresensiSelfiePage extends StatelessWidget {
@@ -199,9 +200,17 @@ class _PhotoControls extends StatelessWidget {
       builder: (_) => dialog,
     );
     if (kembaliKeBeranda == true && context.mounted) {
-      // Pratinjau dibuka dari Beranda; tutup halaman selfie untuk kembali.
       Navigator.of(context).maybePop();
     }
+  }
+
+  void _showIzinBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const AjukanIzinBottomSheet(),
+    );
   }
 
   @override
@@ -263,6 +272,27 @@ class _PhotoControls extends StatelessWidget {
             builder: (_) => const PresensiBerhasilDialog(),
           ),
           child: const Text('Kirim Presensi Sekarang'),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: () => _showIzinBottomSheet(context),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: _ink,
+            side: BorderSide(color: Colors.grey.shade300),
+            minimumSize: const Size.fromHeight(48),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          icon: const Icon(
+            Icons.assignment_turned_in_outlined,
+            size: 18,
+            color: _muted,
+          ),
+          label: const Text(
+            'Ajukan Izin / Sakit',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
         ),
         const SizedBox(height: 8),
         TextButton.icon(
