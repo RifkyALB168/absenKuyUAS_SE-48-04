@@ -17,3 +17,8 @@ npm-debug.log*
 
 Vk
 Project_Vault_knowledge
+
+# Pengujian dan referensi revisi lokal
+/mobile/test/
+/mobile/integration_test/
+/REVISI UI/

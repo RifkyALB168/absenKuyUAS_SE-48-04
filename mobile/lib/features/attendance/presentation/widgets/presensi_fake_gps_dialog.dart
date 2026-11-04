@@ -10,9 +10,5 @@ class PresensiFakeGpsDialog extends StatelessWidget {
   Widget build(BuildContext context) => const PresensiDitolakDialog(
     title: 'Lokasi Palsu Terdeteksi',
     subtitle: 'Presensi ditolak karena terdeteksi menggunakan lokasi palsu',
-    code: 'MOCKED_LOCATION',
-    description:
-        'Sistem mendeteksi lokasi tiruan aktif. '
-        'Nonaktifkan lokasi tiruan dan gunakan GPS perangkat, lalu coba ulang.',
   );
 }
