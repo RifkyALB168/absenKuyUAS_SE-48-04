@@ -34,26 +34,26 @@ class _RegisterPageState extends State<RegisterPage> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
 
               // Tombol kembali
               IconButton(
                 onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back),
+                icon: Icon(Icons.arrow_back),
               ),
 
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
 
               // Logo
               Center(child: Image.asset('assets/images/logo.webp', height: 80)),
 
-              const SizedBox(height: 32),
+              SizedBox(height: 32),
 
-              const Text(
+              Text(
                 'Buat Akun Baru',
                 style: TextStyle(
                   fontSize: 26,
@@ -62,69 +62,69 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
 
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
 
-              const Text(
+              Text(
                 'Daftarkan akunmu untuk mulai menggunakan absenKuy.',
                 style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
               ),
 
-              const SizedBox(height: 32),
+              SizedBox(height: 32),
 
               // Nama lengkap
-              const Text(
+              Text(
                 'Nama Lengkap',
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
 
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
 
               TextField(
                 controller: namaController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Masukkan nama lengkap',
                   prefixIcon: Icon(Icons.person_outline),
                   border: OutlineInputBorder(),
                 ),
               ),
 
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
 
               // Email
-              const Text(
+              Text(
                 'Email',
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
 
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
 
               TextField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   hintText: 'Masukkan email',
                   prefixIcon: Icon(Icons.email_outlined),
                   border: OutlineInputBorder(),
                 ),
               ),
 
-              const SizedBox(height: 20),
+              SizedBox(height: 20),
 
               // Password
-              const Text(
+              Text(
                 'Password',
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
 
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
 
               TextField(
                 controller: passwordController,
                 obscureText: !isPasswordVisible,
                 decoration: InputDecoration(
                   hintText: 'Masukkan password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  border: const OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.lock_outline),
+                  border: OutlineInputBorder(),
                   suffixIcon: IconButton(
                     onPressed: () {
                       setState(() {
@@ -140,7 +140,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
               ),
 
-              const SizedBox(height: 32),
+              SizedBox(height: 32),
 
               // Tombol daftar
               SizedBox(
@@ -155,7 +155,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     // Validasi nama
                     if (nama.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text('Nama lengkap wajib diisi!'),
                         ),
                       );
@@ -167,7 +167,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         !email.contains('@') ||
                         !email.contains('.')) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text('Masukkan email yang valid!'),
                         ),
                       );
@@ -177,7 +177,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     // Validasi password minimal 6 karakter
                     if (password.length < 6) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text('Password minimal 6 karakter!'),
                         ),
                       );
@@ -201,13 +201,13 @@ class _RegisterPageState extends State<RegisterPage> {
                       Navigator.pop(context);
 
                       messenger.showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text('Registrasi berhasil! Silakan login.'),
                         ),
                       );
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Email sudah terdaftar!')),
+                        SnackBar(content: Text('Email sudah terdaftar!')),
                       );
                     }
                   },
@@ -215,19 +215,19 @@ class _RegisterPageState extends State<RegisterPage> {
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                   ),
-                  child: const Text(
+                  child: Text(
                     'Daftar',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
 
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
 
               Center(
                 child: TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Sudah punya akun? Masuk'),
+                  child: Text('Sudah punya akun? Masuk'),
                 ),
               ),
             ],
