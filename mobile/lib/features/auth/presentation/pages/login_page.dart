@@ -33,7 +33,7 @@ class LoginView extends StatelessWidget {
             if (state.status == LoginStatus.authenticated) {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const MainPage()),
+                MaterialPageRoute(builder: (context) => MainPage()),
               );
             }
 
@@ -45,11 +45,11 @@ class LoginView extends StatelessWidget {
           },
           builder: (context, state) {
             return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+              padding: EdgeInsets.symmetric(horizontal: 28, vertical: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
 
                   // Logo aplikasi.
                   Center(
@@ -60,10 +60,10 @@ class LoginView extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
 
                   // Judul halaman.
-                  const Text(
+                  Text(
                     'Selamat Datang di absenKuy',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -73,9 +73,9 @@ class LoginView extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 10),
+                  SizedBox(height: 10),
 
-                  const Text(
+                  Text(
                     'Masuk untuk melanjutkan ke akun Anda',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -84,11 +84,11 @@ class LoginView extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32),
 
                   // Tab Masuk dan Daftar.
                   Container(
-                    padding: const EdgeInsets.all(4),
+                    padding: EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       color: AppColors.background,
                       borderRadius: BorderRadius.circular(12),
@@ -97,18 +97,18 @@ class LoginView extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            padding: EdgeInsets.symmetric(vertical: 12),
                             decoration: BoxDecoration(
                               color: AppColors.surface,
                               borderRadius: BorderRadius.circular(9),
-                              boxShadow: const [
+                              boxShadow: [
                                 BoxShadow(
                                   color: Color(0x10000000),
                                   blurRadius: 4,
                                 ),
                               ],
                             ),
-                            child: const Text(
+                            child: Text(
                               'Masuk',
                               textAlign: TextAlign.center,
                               style: TextStyle(
@@ -125,11 +125,11 @@ class LoginView extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const RegisterPage(),
+                                  builder: (context) => RegisterPage(),
                                 ),
                               );
                             },
-                            child: const Padding(
+                            child: Padding(
                               padding: EdgeInsets.symmetric(vertical: 12),
                               child: Text(
                                 'Daftar',
@@ -146,10 +146,10 @@ class LoginView extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 28),
+                  SizedBox(height: 28),
 
                   // Label email.
-                  const Text(
+                  Text(
                     'Email Mahasiswa / Kampus',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
@@ -158,7 +158,7 @@ class LoginView extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 10),
+                  SizedBox(height: 10),
 
                   // Input email.
                   TextField(
@@ -168,28 +168,28 @@ class LoginView extends StatelessWidget {
                     },
                     decoration: InputDecoration(
                       hintText: 'nama@email.com',
-                      prefixIcon: const Icon(
+                      prefixIcon: Icon(
                         Icons.email_outlined,
                         color: AppColors.textSecondary,
                       ),
                       errorText: state.emailError,
                       filled: true,
                       fillColor: AppColors.surface,
-                      contentPadding: const EdgeInsets.symmetric(
+                      contentPadding: EdgeInsets.symmetric(
                         vertical: 16,
                         horizontal: 16,
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: AppColors.border),
+                        borderSide: BorderSide(color: AppColors.border),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: AppColors.border),
+                        borderSide: BorderSide(color: AppColors.border),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
+                        borderSide: BorderSide(
                           color: AppColors.primary,
                           width: 1.5,
                         ),
@@ -197,10 +197,10 @@ class LoginView extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
 
                   // Label password.
-                  const Text(
+                  Text(
                     'Kata Sandi',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
@@ -209,7 +209,7 @@ class LoginView extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 10),
+                  SizedBox(height: 10),
 
                   // Input password.
                   TextField(
@@ -221,7 +221,7 @@ class LoginView extends StatelessWidget {
                     },
                     decoration: InputDecoration(
                       hintText: 'Masukkan kata sandi',
-                      prefixIcon: const Icon(
+                      prefixIcon: Icon(
                         Icons.lock_outline,
                         color: AppColors.textSecondary,
                       ),
@@ -234,28 +234,28 @@ class LoginView extends StatelessWidget {
                         ),
                         onPressed: () {
                           context.read<LoginBloc>().add(
-                            const LoginPasswordVisibilityToggled(),
+                            LoginPasswordVisibilityToggled(),
                           );
                         },
                       ),
                       errorText: state.passwordError,
                       filled: true,
                       fillColor: AppColors.surface,
-                      contentPadding: const EdgeInsets.symmetric(
+                      contentPadding: EdgeInsets.symmetric(
                         vertical: 16,
                         horizontal: 16,
                       ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: AppColors.border),
+                        borderSide: BorderSide(color: AppColors.border),
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: AppColors.border),
+                        borderSide: BorderSide(color: AppColors.border),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
+                        borderSide: BorderSide(
                           color: AppColors.primary,
                           width: 1.5,
                         ),
@@ -263,7 +263,7 @@ class LoginView extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12),
 
                   // Checkbox dan lupa password.
                   Row(
@@ -272,7 +272,7 @@ class LoginView extends StatelessWidget {
                         child: InkWell(
                           onTap: () {
                             context.read<LoginBloc>().add(
-                              const LoginRememberMeToggled(),
+                              LoginRememberMeToggled(),
                             );
                           },
                           child: Row(
@@ -282,11 +282,11 @@ class LoginView extends StatelessWidget {
                                 activeColor: AppColors.primary,
                                 onChanged: (value) {
                                   context.read<LoginBloc>().add(
-                                    const LoginRememberMeToggled(),
+                                    LoginRememberMeToggled(),
                                   );
                                 },
                               ),
-                              const Expanded(
+                              Expanded(
                                 child: Text(
                                   'Tetap masuk di perangkat ini',
                                   style: TextStyle(fontSize: 12),
@@ -299,7 +299,7 @@ class LoginView extends StatelessWidget {
                       TextButton(
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
+                            SnackBar(
                               content: Text(
                                 'Fitur lupa kata sandi belum tersedia.',
                               ),
@@ -318,14 +318,14 @@ class LoginView extends StatelessWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
 
                   // Tombol masuk.
                   SizedBox(
                     height: 52,
                     child: ElevatedButton(
                       onPressed: () {
-                        context.read<LoginBloc>().add(const LoginSubmitted());
+                        context.read<LoginBloc>().add(LoginSubmitted());
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
@@ -335,7 +335,7 @@ class LoginView extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
+                      child: Text(
                         'Masuk',
                         style: TextStyle(
                           fontSize: 16,
@@ -345,7 +345,7 @@ class LoginView extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                 ],
               ),
             );
