@@ -1,16 +1,37 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
-import '../widgets/presensi_berhasil_dialog.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../data/datasources/selfie_camera.dart';
+import '../../domain/repositories/selfie_repository.dart';
+import '../bloc/selfie_cubit.dart';
+import '../bloc/selfie_state.dart';
 import '../widgets/presensi_di_luar_radius_dialog.dart';
 import '../widgets/presensi_fake_gps_dialog.dart';
 import '../widgets/ajukan_izin_bottom_sheet.dart';
 
-/// Pratinjau UI M4 dengan data contoh; belum mengakses kamera, GPS, atau API.
+/// Selfie dari kamera; validasi lokasi dan pengiriman API belum terhubung.
 class PresensiSelfiePage extends StatelessWidget {
-  const PresensiSelfiePage({super.key});
+  const PresensiSelfiePage({super.key, this.camera});
+
+  final SelfieRepository? camera;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => BlocProvider(
+    create: (_) => SelfieCubit(camera ?? SelfieCamera())..recoverPhoto(),
+    child: BlocConsumer<SelfieCubit, SelfieState>(
+      listener: (context, state) {
+        if (state.error != null) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(state.error!)));
+        }
+      },
+      builder: (context, state) => _buildPage(context, state),
+    ),
+  );
+
+  Widget _buildPage(BuildContext context, SelfieState state) {
     return Scaffold(
       backgroundColor: _background,
       appBar: AppBar(
@@ -56,13 +77,13 @@ class PresensiSelfiePage extends StatelessWidget {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 spacing: 12,
                 children: [
-                  _CameraPreview(),
-                  _ValidationCard(),
-                  _PhotoControls(),
+                  _CameraPreview(photo: state.photo, isBusy: state.isBusy),
+                  const _ValidationCard(),
+                  _PhotoControls(state: state),
                 ],
               ),
             ),
@@ -74,33 +95,62 @@ class PresensiSelfiePage extends StatelessWidget {
 }
 
 class _CameraPreview extends StatelessWidget {
-  const _CameraPreview();
+  const _CameraPreview({required this.photo, required this.isBusy});
+
+  final File? photo;
+  final bool isBusy;
 
   @override
   Widget build(BuildContext context) => Semantics(
-    label: 'Pratinjau kamera',
+    label: photo == null ? 'Pratinjau kamera' : 'Hasil foto selfie',
     child: AspectRatio(
       aspectRatio: 1,
       child: Container(
-        alignment: Alignment.topCenter,
-        padding: const EdgeInsets.all(12),
         clipBehavior: Clip.antiAlias,
         decoration: const BoxDecoration(
           color: Color(0xFF25313D),
           borderRadius: BorderRadius.all(Radius.circular(20)),
         ),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(8),
-          decoration: const BoxDecoration(
-            color: Color(0xFF17212D),
-            borderRadius: BorderRadius.all(Radius.circular(16)),
-          ),
-          child: const Text(
-            'Posisikan wajah Anda di tengah kamera',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white, fontSize: 11),
-          ),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (photo != null)
+              Image.file(
+                photo!,
+                fit: BoxFit.contain,
+                errorBuilder: (_, _, _) => const Center(
+                  child: Text(
+                    'Foto tidak dapat ditampilkan. Silakan foto ulang.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            Positioned(
+              top: 12,
+              left: 12,
+              right: 12,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(8),
+                decoration: const BoxDecoration(
+                  color: Color(0xFF17212D),
+                  borderRadius: BorderRadius.all(Radius.circular(16)),
+                ),
+                child: Text(
+                  photo == null
+                      ? 'Posisikan wajah Anda di tengah kamera'
+                      : 'Pastikan wajah terlihat jelas sebelum melanjutkan',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white, fontSize: 11),
+                ),
+              ),
+            ),
+            if (isBusy)
+              const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              ),
+          ],
         ),
       ),
     ),
@@ -192,7 +242,9 @@ class _ValidationItem extends StatelessWidget {
 }
 
 class _PhotoControls extends StatelessWidget {
-  const _PhotoControls();
+  const _PhotoControls({required this.state});
+
+  final SelfieState state;
 
   Future<void> _previewRejection(BuildContext context, Widget dialog) async {
     final kembaliKeBeranda = await showDialog<bool>(
@@ -222,15 +274,17 @@ class _PhotoControls extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Expanded(
+            Expanded(
               child: Column(
                 children: [
                   IconButton(
                     tooltip: 'Foto ulang',
-                    onPressed: null,
-                    icon: Icon(Icons.restart_alt_rounded),
+                    onPressed: state.photo == null || state.isBusy
+                        ? null
+                        : () => context.read<SelfieCubit>().takePhoto(),
+                    icon: const Icon(Icons.restart_alt_rounded),
                   ),
-                  Text(
+                  const Text(
                     'Foto Ulang',
                     style: TextStyle(color: _muted, fontSize: 11),
                   ),
@@ -250,7 +304,9 @@ class _PhotoControls extends StatelessWidget {
                   foregroundColor: Colors.white,
                   fixedSize: const Size(56, 56),
                 ),
-                onPressed: () {},
+                onPressed: state.isBusy
+                    ? null
+                    : () => context.read<SelfieCubit>().takePhoto(),
                 icon: const Icon(Icons.photo_camera_outlined, size: 28),
               ),
             ),
@@ -267,10 +323,15 @@ class _PhotoControls extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          onPressed: () => showDialog<void>(
-            context: context,
-            builder: (_) => const PresensiBerhasilDialog(),
-          ),
+          onPressed: state.photo == null || state.isBusy
+              ? null
+              : () => ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Selfie siap. Pengiriman presensi ke server belum tersedia.',
+                    ),
+                  ),
+                ),
           child: const Text('Kirim Presensi Sekarang'),
         ),
         const SizedBox(height: 8),
