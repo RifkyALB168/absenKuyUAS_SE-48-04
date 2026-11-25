@@ -4,34 +4,61 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/datasources/selfie_camera.dart';
+import '../../domain/attendance_check.dart';
+import '../../domain/repositories/attendance_repository.dart';
 import '../../domain/repositories/selfie_repository.dart';
 import '../bloc/selfie_cubit.dart';
 import '../bloc/selfie_state.dart';
-import '../widgets/presensi_di_luar_radius_dialog.dart';
-import '../widgets/presensi_fake_gps_dialog.dart';
-import '../widgets/ajukan_izin_bottom_sheet.dart';
+import '../widgets/attendance_issue_dialog.dart';
+import '../widgets/presensi_berhasil_dialog.dart';
 
-/// Selfie dari kamera; validasi lokasi dan pengiriman API belum terhubung.
 class PresensiSelfiePage extends StatelessWidget {
-  const PresensiSelfiePage({super.key, this.camera});
+  const PresensiSelfiePage({
+    super.key,
+    required this.event,
+    required this.check,
+    required this.locate,
+    this.attendanceRepository,
+    this.camera,
+  });
 
+  final AttendanceEvent event;
+  final AttendanceCheck check;
+  final Future<AttendancePosition> Function() locate;
+  final AttendanceRepository? attendanceRepository;
   final SelfieRepository? camera;
 
   @override
   Widget build(BuildContext context) => BlocProvider(
     create: (_) => SelfieCubit(camera ?? SelfieCamera())..recoverPhoto(),
     child: BlocConsumer<SelfieCubit, SelfieState>(
-      listener: (context, state) {
+      listener: (context, state) async {
+        if (state.issue case final issue?) {
+          await showAttendanceIssue(context, event, issue);
+          return;
+        }
+        if (state.submitted) {
+          await showDialog<void>(
+            context: context,
+            builder: (_) => const PresensiBerhasilDialog(),
+          );
+          if (context.mounted) Navigator.of(context).maybePop();
+          return;
+        }
         if (state.error != null) {
           ScaffoldMessenger.of(context)
               .showSnackBar(SnackBar(content: Text(state.error!)));
         }
       },
-      builder: (context, state) => _buildPage(context, state),
+      builder: (context, state) => PopScope(
+        canPop: !state.isSubmitting,
+        child: _buildPage(context, state),
+      ),
     ),
   );
 
   Widget _buildPage(BuildContext context, SelfieState state) {
+    final repository = attendanceRepository;
     return Scaffold(
       backgroundColor: _background,
       appBar: AppBar(
@@ -82,8 +109,20 @@ class PresensiSelfiePage extends StatelessWidget {
                 spacing: 12,
                 children: [
                   _CameraPreview(photo: state.photo, isBusy: state.isBusy),
-                  const _ValidationCard(),
-                  _PhotoControls(state: state),
+                  _ValidationCard(event: event, check: check),
+                  _PhotoControls(
+                    state: state,
+                    onSubmit: repository == null || event.isDemo
+                        ? null
+                        : () => context.read<SelfieCubit>().submit(
+                            event: event,
+                            locate: locate,
+                            repository: repository,
+                          ),
+                    unavailableMessage: event.isDemo
+                        ? 'Kegiatan demo. Selfie hanya digunakan untuk pratinjau.'
+                        : 'Pengiriman presensi belum tersedia.',
+                  ),
                 ],
               ),
             ),
@@ -158,21 +197,24 @@ class _CameraPreview extends StatelessWidget {
 }
 
 class _ValidationCard extends StatelessWidget {
-  const _ValidationCard();
+  const _ValidationCard({required this.event, required this.check});
+
+  final AttendanceEvent event;
+  final AttendanceCheck check;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: _cardDecoration,
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'STATUS VALIDASI KEAMANAN SISTEM',
+          const Text(
+            'PEMERIKSAAN AWAL DI PERANGKAT',
             style: TextStyle(color: _muted, fontSize: 10, letterSpacing: 0.4),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 8,
@@ -180,15 +222,16 @@ class _ValidationCard extends StatelessWidget {
               Expanded(
                 child: _ValidationItem(
                   icon: Icons.verified_outlined,
-                  title: 'Geofence',
-                  subtitle: '18 m / 50 m (Valid)',
+                  title: 'Jarak ke kegiatan',
+                  subtitle:
+                      '${check.distance.toStringAsFixed(1)} m / ${event.radiusMeters} m',
                 ),
               ),
               Expanded(
                 child: _ValidationItem(
-                  icon: Icons.schedule_rounded,
-                  title: 'Waktu NTP',
-                  subtitle: 'Tersinkronisasi',
+                  icon: Icons.my_location,
+                  title: 'Akurasi GPS',
+                  subtitle: '±${check.position.accuracy.toStringAsFixed(1)} m',
                 ),
               ),
             ],
@@ -242,28 +285,15 @@ class _ValidationItem extends StatelessWidget {
 }
 
 class _PhotoControls extends StatelessWidget {
-  const _PhotoControls({required this.state});
+  const _PhotoControls({
+    required this.state,
+    required this.onSubmit,
+    required this.unavailableMessage,
+  });
 
   final SelfieState state;
-
-  Future<void> _previewRejection(BuildContext context, Widget dialog) async {
-    final kembaliKeBeranda = await showDialog<bool>(
-      context: context,
-      builder: (_) => dialog,
-    );
-    if (kembaliKeBeranda == true && context.mounted) {
-      Navigator.of(context).maybePop();
-    }
-  }
-
-  void _showIzinBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const AjukanIzinBottomSheet(),
-    );
-  }
+  final VoidCallback? onSubmit;
+  final String unavailableMessage;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -279,7 +309,11 @@ class _PhotoControls extends StatelessWidget {
                 children: [
                   IconButton(
                     tooltip: 'Foto ulang',
-                    onPressed: state.photo == null || state.isBusy
+                    onPressed:
+                        state.photo == null ||
+                            state.isBusy ||
+                            state.retrying ||
+                            state.submitted
                         ? null
                         : () => context.read<SelfieCubit>().takePhoto(),
                     icon: const Icon(Icons.restart_alt_rounded),
@@ -304,7 +338,7 @@ class _PhotoControls extends StatelessWidget {
                   foregroundColor: Colors.white,
                   fixedSize: const Size(56, 56),
                 ),
-                onPressed: state.isBusy
+                onPressed: state.isBusy || state.retrying || state.submitted
                     ? null
                     : () => context.read<SelfieCubit>().takePhoto(),
                 icon: const Icon(Icons.photo_camera_outlined, size: 28),
@@ -323,54 +357,25 @@ class _PhotoControls extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          onPressed: state.photo == null || state.isBusy
+          onPressed: state.photo == null || state.isBusy || state.submitted
               ? null
-              : () => ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Selfie siap. Pengiriman presensi ke server belum tersedia.',
-                    ),
-                  ),
-                ),
-          child: const Text('Kirim Presensi Sekarang'),
-        ),
-        const SizedBox(height: 8),
-        OutlinedButton.icon(
-          onPressed: () => _showIzinBottomSheet(context),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: _ink,
-            side: BorderSide(color: Colors.grey.shade300),
-            minimumSize: const Size.fromHeight(48),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
-          icon: const Icon(
-            Icons.assignment_turned_in_outlined,
-            size: 18,
-            color: _muted,
-          ),
-          label: const Text(
-            'Ajukan Izin / Sakit',
-            style: TextStyle(fontWeight: FontWeight.w600),
+              : onSubmit,
+          child: Text(
+            state.isSubmitting
+                ? 'Mengirim presensi…'
+                : state.retrying
+                ? 'Coba Kirim Lagi'
+                : 'Kirim Presensi Sekarang',
           ),
         ),
-        const SizedBox(height: 8),
-        TextButton.icon(
-          onPressed: () =>
-              _previewRejection(context, const PresensiDiLuarRadiusDialog()),
-          icon: const Icon(Icons.location_off_outlined, size: 18),
-          label: const Text(
-            'Simulasi di luar radius',
+        if (onSubmit == null) ...[
+          const SizedBox(height: 8),
+          Text(
+            unavailableMessage,
             textAlign: TextAlign.center,
+            style: const TextStyle(color: _muted),
           ),
-        ),
-        TextButton.icon(
-          onPressed: () =>
-              _previewRejection(context, const PresensiFakeGpsDialog()),
-          icon: const Icon(Icons.gps_off_rounded, size: 18),
-          label: const Text('Simulasi Fake GPS', textAlign: TextAlign.center),
-        ),
+        ],
       ],
     ),
   );

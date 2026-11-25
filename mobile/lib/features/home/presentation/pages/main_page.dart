@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../attendance/presentation/pages/presensi_selfie_page.dart';
+import '../../../attendance/domain/repositories/attendance_repository.dart';
 import '../../../event/presentation/pages/event_list_page.dart';
 import '../../../history/presentation/pages/attendance_history_page.dart';
 
@@ -8,9 +8,11 @@ import '../../../history/presentation/pages/attendance_history_page.dart';
 /// sesuai desain Figma (frame "Nav - Destination count: 4").
 ///
 /// Kegiatan dan Riwayat memakai halaman fiturnya. Beranda dan Profil
-/// masih placeholder; akses pratinjau presensi sementara ada di Beranda.
+/// masih placeholder. Presensi dibuka dari Detail Kegiatan.
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+  const MainPage({super.key, this.attendanceRepository});
+
+  final AttendanceRepository? attendanceRepository;
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -19,31 +21,27 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
 
-  static const _tabs = <_TabItem>[
+  List<_TabItem> get _tabs => <_TabItem>[
     // Beranda: kegiatan (Ibnu, M3) dan skor keaktifan (Daniartha, S3)
-    _TabItem(
+    const _TabItem(
       label: 'Beranda',
       icon: Icons.home_rounded,
-      page: _TabPlaceholder(
-        title: 'Beranda',
-        icon: Icons.home_rounded,
-        action: _PresensiPreviewButton(),
-      ),
+      page: _TabPlaceholder(title: 'Beranda', icon: Icons.home_rounded),
     ),
     // Daftar kegiatan (Ibnu, M3)
     _TabItem(
       label: 'Kegiatan',
       icon: Icons.groups_rounded,
-      page: EventListPage(),
+      page: EventListPage(attendanceRepository: widget.attendanceRepository),
     ),
     // Riwayat kehadiran (Daniartha, M6)
-    _TabItem(
+    const _TabItem(
       label: 'Riwayat',
       icon: Icons.history_rounded,
       page: AttendanceHistoryPage(),
     ),
     // Profil pengguna (Affan, M1)
-    _TabItem(
+    const _TabItem(
       label: 'Profil',
       icon: Icons.person_outline_rounded,
       page: _TabPlaceholder(
@@ -111,11 +109,10 @@ class _TabItem {
 
 /// Isi sementara sebuah tab sampai halaman aslinya dibuat.
 class _TabPlaceholder extends StatelessWidget {
-  const _TabPlaceholder({required this.title, required this.icon, this.action});
+  const _TabPlaceholder({required this.title, required this.icon});
 
   final String title;
   final IconData icon;
-  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
@@ -134,25 +131,11 @@ class _TabPlaceholder extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            if (action != null) ...[const SizedBox(height: 16), action!],
           ],
         ),
       ),
     );
   }
-}
-
-class _PresensiPreviewButton extends StatelessWidget {
-  const _PresensiPreviewButton();
-
-  @override
-  Widget build(BuildContext context) => OutlinedButton.icon(
-    onPressed: () => Navigator.of(
-      context,
-    ).push<void>(MaterialPageRoute(builder: (_) => const PresensiSelfiePage())),
-    icon: const Icon(Icons.photo_camera_outlined),
-    label: const Text('Pratinjau UI Presensi'),
-  );
 }
 
 // Warna dari desain Figma; dipindah ke core/theme saat tema bersama tersedia.

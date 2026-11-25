@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'presensi_dialog.dart';
 
-/// Kartu hasil contoh sesuai Figma, belum menandakan penyimpanan ke server.
+/// Ditampilkan setelah server mengonfirmasi presensi tersimpan.
 class PresensiBerhasilDialog extends StatelessWidget {
   const PresensiBerhasilDialog({super.key});
 
