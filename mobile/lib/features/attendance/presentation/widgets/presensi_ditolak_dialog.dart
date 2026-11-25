@@ -3,16 +3,18 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import 'presensi_dialog.dart';
 
-/// Kartu penolakan presensi untuk pratinjau radius dan lokasi palsu.
+/// Kartu penolakan beserta tindakan untuk mengatasi masalah presensi.
 class PresensiDitolakDialog extends StatelessWidget {
   const PresensiDitolakDialog({
     super.key,
     required this.title,
     required this.subtitle,
+    this.settings,
   });
 
   final String title;
   final String subtitle;
+  final Future<bool> Function()? settings;
 
   @override
   Widget build(BuildContext context) => PresensiDialog(
@@ -55,7 +57,25 @@ class PresensiDitolakDialog extends StatelessWidget {
       ),
       const SizedBox(height: 20),
       FilledButton.icon(
-        onPressed: () => Navigator.of(context).pop(),
+        onPressed: settings == null
+            ? () => Navigator.of(context).pop()
+            : () async {
+                var opened = false;
+                try {
+                  opened = await settings!();
+                } catch (_) {
+                  // Perangkat dapat meminta pengguna membuka pengaturan sendiri.
+                }
+                if (!context.mounted) return;
+                Navigator.of(context).pop();
+                if (!opened) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Buka pengaturan dari perangkat Anda.'),
+                    ),
+                  );
+                }
+              },
         style: FilledButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.surface,
@@ -65,20 +85,20 @@ class PresensiDitolakDialog extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        icon: const Icon(Icons.refresh_rounded, size: 20),
-        label: const Text('Coba Ulang', textAlign: TextAlign.center),
+        icon: Icon(
+          settings == null ? Icons.refresh_rounded : Icons.settings_outlined,
+          size: 20,
+        ),
+        label: Text(
+          settings == null ? 'Mengerti' : 'Buka Pengaturan',
+          textAlign: TextAlign.center,
+        ),
       ),
-      const SizedBox(height: 4),
-      TextButton(
-        onPressed: () => Navigator.of(context).pop(true),
-        child: const Text('Kembali ke Beranda', textAlign: TextAlign.center),
-      ),
-      const SizedBox(height: 8),
-      const Text(
-        'Data contoh · Lokasi belum diperiksa',
-        textAlign: TextAlign.center,
-        style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
-      ),
+      if (settings != null)
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Tutup'),
+        ),
     ],
   );
 }

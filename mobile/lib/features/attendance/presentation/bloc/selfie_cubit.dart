@@ -1,8 +1,11 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../domain/attendance_check.dart';
+import '../../domain/repositories/attendance_repository.dart';
 import '../../domain/repositories/selfie_repository.dart';
 import 'selfie_state.dart';
 
@@ -10,13 +13,15 @@ class SelfieCubit extends Cubit<SelfieState> {
   SelfieCubit(this._camera) : super(const SelfieState());
 
   final SelfieRepository _camera;
+  AttendancePosition? _pendingPosition;
+  String? _requestId;
 
   Future<void> recoverPhoto() => _loadPhoto(_camera.recoverPhoto);
 
   Future<void> takePhoto() => _loadPhoto(_camera.takePhoto);
 
   Future<void> _loadPhoto(Future<File?> Function() load) async {
-    if (isClosed || state.isBusy) return;
+    if (isClosed || state.isBusy || state.retrying || state.submitted) return;
     final previous = state.photo;
     emit(SelfieState(photo: previous, isBusy: true));
     try {
@@ -52,6 +57,71 @@ class SelfieCubit extends Cubit<SelfieState> {
           SelfieState(
             photo: previous,
             error: 'Foto gagal diproses. Silakan coba lagi.',
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> submit({
+    required AttendanceEvent event,
+    required Future<AttendancePosition> Function() locate,
+    required AttendanceRepository repository,
+  }) async {
+    final photo = state.photo;
+    if (isClosed ||
+        state.isBusy ||
+        state.submitted ||
+        photo == null ||
+        event.isDemo) {
+      return;
+    }
+
+    emit(SelfieState(photo: photo, isBusy: true, isSubmitting: true));
+    try {
+      // Saat respons putus, ulangi kiriman yang sama untuk memulihkan hasilnya.
+      final position =
+          _pendingPosition ??
+          (await AttendanceCheck.run(event, locate)).position;
+      if (isClosed) return;
+      final random = Random.secure();
+      final requestId = _requestId ??= List.generate(
+        16,
+        (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
+      ).join();
+      _pendingPosition = position;
+      await repository.submit(
+        event: event,
+        position: position,
+        photo: photo,
+        requestId: requestId,
+      );
+      _pendingPosition = null;
+      if (!isClosed) emit(const SelfieState(submitted: true));
+      await _camera.deletePhoto(photo);
+    } on AttendanceBlocked catch (failure) {
+      if (!isClosed) emit(SelfieState(photo: photo, issue: failure));
+    } on AttendanceSubmitFailure catch (failure) {
+      if (!failure.retrySameRequest) {
+        _pendingPosition = null;
+        _requestId = null;
+      }
+      if (!isClosed) {
+        emit(
+          SelfieState(
+            photo: photo,
+            error: failure.message,
+            retrying: _pendingPosition != null,
+          ),
+        );
+      }
+    } catch (_) {
+      if (!isClosed) {
+        emit(
+          SelfieState(
+            photo: photo,
+            error: 'Presensi belum bisa dikonfirmasi. Silakan coba lagi.',
+            retrying: _pendingPosition != null,
           ),
         );
       }

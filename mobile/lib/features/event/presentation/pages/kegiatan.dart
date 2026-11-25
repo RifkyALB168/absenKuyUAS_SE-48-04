@@ -1,3 +1,7 @@
+import 'package:intl/intl.dart';
+
+import '../../../attendance/domain/attendance_check.dart';
+
 /// Data kegiatan untuk layar M3 (manajemen kegiatan).
 ///
 /// Nilai di bawah ini tetap dan tidak lewat repository, bloc, atau jaringan,
@@ -13,6 +17,7 @@ class Kegiatan {
     required this.status,
     required this.hadir,
     required this.total,
+    this.presensi,
   });
 
   final String judul;
@@ -24,25 +29,42 @@ class Kegiatan {
   final StatusKegiatan status;
   final int hadir;
   final int total;
+  final AttendanceEvent? presensi;
 }
 
 /// Status kegiatan pada daftar M3.
 enum StatusKegiatan { berlangsung, dijadwalkan, ditutup }
 
+// Jendela kegiatan demo dimulai saat aplikasi memuat daftar contoh.
+final _waktuContoh = DateTime.now();
+final _bukaContoh = _waktuContoh.subtract(const Duration(hours: 1));
+final _tutupContoh = _waktuContoh.add(const Duration(hours: 1));
+
 /// Tiga kegiatan yang tampil di halaman daftar.
-const List<Kegiatan> daftarKegiatan = <Kegiatan>[
+final List<Kegiatan> daftarKegiatan = <Kegiatan>[
   Kegiatan(
     judul: 'Rapat Pleno & Evaluasi Mingguan',
     kelompok: 'UKM Robotika',
-    tanggal: '23 Okt 2026',
-    jam: '14:00 – 16:00 WIB',
-    lokasi: 'Gedung Tokong Nanas (TULT) Lt. 3',
+    tanggal: DateFormat('dd/MM/yyyy').format(_waktuContoh),
+    jam:
+        '${DateFormat('HH:mm').format(_bukaContoh)} – '
+        '${DateFormat('HH:mm').format(_tutupContoh)}',
+    lokasi: 'Titik contoh kampus',
     radiusMeter: 50,
     status: StatusKegiatan.berlangsung,
     hadir: 28,
     total: 32,
+    presensi: AttendanceEvent(
+      id: 'demo-pleno',
+      latitude: -6.973210,
+      longitude: 107.638400,
+      radiusMeters: 50,
+      opensAt: _bukaContoh.toUtc(),
+      closesAt: _tutupContoh.toUtc(),
+      isDemo: true,
+    ),
   ),
-  Kegiatan(
+  const Kegiatan(
     judul: 'Weekly Riset & Development',
     kelompok: 'UKM CCI',
     tanggal: '24 Okt 2026',
@@ -53,7 +75,7 @@ const List<Kegiatan> daftarKegiatan = <Kegiatan>[
     hadir: 0,
     total: 24,
   ),
-  Kegiatan(
+  const Kegiatan(
     judul: 'Latihan Gabungan Antar Kampus',
     kelompok: 'UKM Basket',
     tanggal: '10 Okt 2026',
@@ -77,8 +99,7 @@ const String judulKegiatan = 'Weekly Riset & Development';
 const String tanggalKegiatan = 'Jumat, 24 Okt 2026';
 
 /// Isi awal untuk layar pilih titik & radius geofence.
-const String alamatGeocoding =
-    'Gedung Student Center, Jl. Telekomunikasi';
+const String alamatGeocoding = 'Gedung Student Center, Jl. Telekomunikasi';
 const String koordinatLat = '-6.973210';
 const String koordinatLng = '107.638400';
 const int radiusMeter = 50;
